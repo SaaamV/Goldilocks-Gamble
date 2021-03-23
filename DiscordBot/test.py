@@ -1,7 +1,3 @@
-import os
-
-print(os.getcwd())
-
-with open('./start_message.txt', 'r') as start_message:
-    for line in start_message:
-        print(line)
+import pandas as pd
+df=pd.read_csv('data.csv')
+x=df.loc[df['id']==822192079986884641,'era']

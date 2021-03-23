@@ -2,11 +2,31 @@ import discord
 import random
 import os
 from discord.ext import commands
-
+import pandas as pd
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', intents = intents)
 
+def convert(lst):
+    res_dct = {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
+    return res_dct
+
+
+def buy_resource(id,resource):
+    df=pd.read_csv('data.csv')
+    cred=0
+    amount=0
+    era=int(df.loc[df['id']==id,'era'])
+    with open('resources.csv') as resource_file:
+        if resource_file.split(sep=',')[0]==resource:
+            cred=resource_file.split(sep=',')[era+1]
+            amount=resource_file.split(sep=',')[1]
+    df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']-df.loc[df['id']==id,'multiplier']*cred
+    df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+amount
+    df.to_csv('data.csv',index=False)
+    print(df)           
+
+                
 
 @client.event
 async def on_member_join(member):
@@ -22,8 +42,12 @@ async def on_command_error(ctx, error):
         await ctx.send("Command doesn't exist")
 
 @client.command()
-async def start(ctx):
+async def buy(ctx, resource):
+    team=ctx.channel.id
+    buy_resource(team,resource)
 
+@client.command()
+async def start(ctx):
     with open('./start_message.txt', 'r') as start_message:
         embed = discord.Embed(color=discord.Colour.red(), description='r[A]men')
         embed.set_thumbnail(url=ctx.author.avatar_url)
@@ -32,6 +56,13 @@ async def start(ctx):
             ct=ct+1
             embed.add_field(name=str(ct), value=line, inline=False)
         await ctx.send(embed=embed)
+
+@client.command()
+async def stats(ctx):
+    print(ctx.channel.id)
+    df=pd.read_csv('data.csv')
+    print(df)
+    await ctx.send(df)
 
 
 @client.command(aliases=['8ball'])
@@ -112,4 +143,4 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 
-client.run('ODIyMTg4NzU2ODUzMDYzNzAw.YFOo8w.yNrt_xGFwudqbdWu1DkBlXgZ8f4')
+client.run('')
