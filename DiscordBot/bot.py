@@ -18,12 +18,17 @@ def buy_resource(id,resource):
     amount=0
     era=int(df.loc[df['id']==id,'era'])
     with open('resources.csv') as resource_file:
-        if resource_file.split(sep=',')[0]==resource:
-            cred=resource_file.split(sep=',')[era+1]
-            amount=resource_file.split(sep=',')[1]
-    df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']-df.loc[df['id']==id,'multiplier']*cred
-    df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+amount
-    df.to_csv('data.csv',index=False)
+        for row in resource_file:
+            if row.split(sep=',')[0]==resource:
+                cred=row.split(sep=',')[era+1]
+                print(cred)
+                amount=row.split(sep=',')[1]
+                print(amount)
+    
+    print("out of the loop")
+    df.loc[df['id']==id,'credits']=float(df.loc[df['id']==id,'credits'])-float(df.loc[df['id']==id,'multiplier'])*cred
+    df.loc[df['id']==id,str(resource)]=float(df.loc[df['id']==id,str(resource)])+amount
+    df.to_csv('data.csv')
     print(df)           
 
                 
@@ -44,6 +49,7 @@ async def on_command_error(ctx, error):
 @client.command()
 async def buy(ctx, resource):
     team=ctx.channel.id
+    print(team,resource)
     buy_resource(team,resource)
 
 @client.command()
@@ -143,4 +149,4 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 
-client.run('')
+client.run('ODIyMTg4NzU2ODUzMDYzNzAw.YFOo8w.F1zaakiq7BnZWXJOlLp50RdL1qE')
