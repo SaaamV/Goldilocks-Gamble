@@ -3,7 +3,6 @@ import random
 import os
 from discord.ext import commands
 import pandas as pd
-from crisis import *
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', intents = intents)
@@ -83,14 +82,14 @@ async def stats(ctx):
     id=ctx.channel.id
     embed = discord.Embed(
         title = 'Stats',
-        description = f'Your planet : {df.loc[df['id']==id,'name']}\n Current Era : { df.loc[df['id']==id,'era']}\n Population : { df.loc[df['id']==id,'population']} \n Average IQ : { df.loc[df['id']==id,'iq']}\n'
+        description = f"Your planet : {df.loc[df['id']==id,'name']}\n Current Era : { df.loc[df['id']==id,'era']}\n Population : { df.loc[df['id']==id,'population']} \n Average IQ : { df.loc[df['id']==id,'iq']}\n"
                       f'------------------------------\n'
                       f'Resources\n'
                       f'------------------------------\n'
-                      f'Air : { df.loc[df['id']==id,'air']}%\n'
-                      f'Land : { df.loc[df['id']==id,'land']}%\n'
-                      f'Water : { df.loc[df['id']==id,'water']}%\n'
-                      f'Flora : { df.loc[df['id']==id,'flora']}%\n  ',
+                      f"Air : { df.loc[df['id']==id,'air']}%\n"
+                      f"Land : { df.loc[df['id']==id,'land']}%\n"
+                      f"Water : { df.loc[df['id']==id,'water']}%\n"
+                      f"Flora : { df.loc[df['id']==id,'flora']}%\n",
         color=discord.Colour.blue()
     )
     await ctx.send(embed=embed)
@@ -174,4 +173,4 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 
-client.run('')
+client.run('NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.NU52Gt0QbVAUqTtQ3jWbEQrvtsw')
