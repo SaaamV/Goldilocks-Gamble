@@ -8,11 +8,6 @@ from crisis import *
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', intents = intents)
     
-def convert(lst):
-    res_dct = {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
-    return res_dct
-
-
 def buy_resource(id,resource):
     df=pd.read_csv('data.csv')
     cred=0
@@ -40,25 +35,7 @@ async def next_turn(ctx):
         turn=[row.split(sep=',')[1] for row in para_file]
         print("You are on turn",int(turn[0]),'!')
         print("Your stats")
-        await stats(ctx)
-     
-
-'''@client.event
-async def on_message(message):
-    print(f'{message.author} sends',message.content)'''
-
-@client.event
-async def on_member_join(member):
-    print(f"{member} has joined the server.")
-
-@client.event
-async def on_member_remove(member):
-    print(f"{member} has left the server.")
-
-@client.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        await ctx.send("Command doesn't exist")
+        await stats(ctx)  
 
 @client.command()
 async def buy(ctx, resource):
@@ -102,42 +79,28 @@ async def id(ctx):
     print("ID requested:", ctx.channel.id)
     print("Channel: ", ctx.channel.name)
 
-@client.command(aliases=['8ball'])
-async def _8ball(ctx, *, question):
-    responses = ["It is certain.",
-                "It is decidedly so.",
-                "Without a doubt.",
-                "Yes - definitely.",
-                "You may rely on it.",
-                "As I see it, yes.",
-                "Most likely.",
-                "Outlook good.",
-                "Yes.",
-                "Signs point to yes.",
-                "Reply hazy, try again.",
-                "Ask again later.",
-                "Better not tell you now.",
-                "Cannot predict now.",
-                "Concentrate and ask again.",
-                "Don't count on it.",
-                "My reply is no.",
-                "My sources say no.",
-                "Outlook not so good.",
-                "Very doubtful."]
-    await ctx.send(f"Question : {question}\nAnswer : {random.choice(responses)}")
+'''@client.event
+async def on_message(message):
+    print(f'{message.author} sends',message.content)'''
+
+@client.event
+async def on_member_join(member):
+    print(f"{member} has joined the server.")
+
+@client.event
+async def on_member_remove(member):
+    print(f"{member} has left the server.")
+
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send("Command doesn't exist")
 
 @client.command()
 @commands.has_permissions(manage_messages = True)
 async def clear(clx, amount = 10):
     await clx.channel.purge(limit=amount)
 
-def is_it_me(ctx):
-    return ctx.author.id == 823258998769582130
-
-@client.command()
-@commands.check(is_it_me)
-async def hi(ctx):
-    await ctx.send(f"Hi i am {ctx.author}")
 
 @client.command()
 async def kick(ctx, member : discord.Member, *, reason = None):
@@ -180,4 +143,4 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 
-client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.dD0eggGH7SXJCs96EOob-hLy-DA')
+client.run('')
