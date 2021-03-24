@@ -1,4 +1,6 @@
-id,name,era,multiplier,credits,air,water,land,population,iq,flora
-822192079986884641,general,2,1.7,10000,40,50,60,10000,40,65
-823592242345672704,Ea-rth,3,0.5,2150,44,40,50,15000,60,78
-773227418856587296,Sa-am,1,1.2,20000,30,40,50,12000,30.6,44
+id,name,era,multiplier,credits,air,water,land,temp,population,iq,flora,size,distance,mass
+824213067659214889,team-1,0,0,0,0.17,60,40,11,0,0,87,Medium,Far,Medium
+824216319788318750,team-2,0,0,0,0.17,60,40,14,0,0,77,Medium,Ideal,Medium
+824216348150071326,team-3,0,0,0,0.17,70,30,11,0,0,77,Large,Far,Heavy
+824216403431260170,team-4,0,0,0,0.17,50,50,17,0,0,75,Small,Close,Light
+824216421030297600,team-5,0,0,0,0.17,70,30,17,0,0,78,Large,Close,Heavy
