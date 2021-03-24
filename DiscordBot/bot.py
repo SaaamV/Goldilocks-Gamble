@@ -13,14 +13,6 @@ teams = 5
 size = {"Small":1, "Medium":2, "Large":3} #large is good
 distance = {"Close":2, "Ideal":3, "Far":1} #ideal is good
 mass = {1:"Light", 2:"Medium", 3:"Heavy"} 
-#Crisis Chart
-crisis = {
-    1:["Floods","Famine","Drought","Tsunami","Cyclone","WW"],
-    2:["Earthquake", "Forest Fire", "PLague", "WW"],
-    3:["Fuel Shortage", "Global Warming", "Water Shortage", "Plague", "Earthquake", "War", "WW"],
-    4:["Earthquake", "COVID", "Ebola", "Solar Flare", "Nuclear Explosion", "water Shortage", "Global Warming"],
-    5:["Meteor Strike", "Fuel Shortage", "Global Warming", "AI Malfunction"]
-}
 
 def initialise():
     df=pd.read_csv('data.csv')
@@ -77,12 +69,6 @@ def buy_resource(id,resource):
     df.to_csv('data.csv',index=False)         
 
 @client.command()
-async def next_turn(ctx):
-    df=pd.read_csv('data.csv')
-
-    #print in each channel - missing
-
-@client.command()
 async def turn(ctx):
     df = pd.read_csv('data.csv')
     matrix2 = df[df.columns[0]]
@@ -94,9 +80,7 @@ async def turn(ctx):
     for channel_ID in channels_to_send:
         chan=client.get_channel(int(channel_ID))
         mess=await chan.get_partial_message(chan.last_message_id).fetch()
-        print(type(mess))
-        cont=await client.get_context(mess)
-        print(cont)        
+        cont=await client.get_context(mess)        
         await stats(cont)
 
     #Population, iq and other parameters update
@@ -170,7 +154,6 @@ async def test(ctx):
         for row in story:
             await ctx.send(row)
 
-
 '''@client.event
 async def on_message(message):
     print(f'{message.author} sends',message.content)'''
@@ -192,7 +175,6 @@ async def on_command_error(ctx, error):
 @commands.has_permissions(manage_messages = True)
 async def clear(clx, amount = 10):
     await clx.channel.purge(limit=amount)
-
 
 @client.command()
 async def kick(ctx, member : discord.Member, *, reason = None):
@@ -233,6 +215,5 @@ async def reload(ctx, extension):
 for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
-
 
 client.run('')
