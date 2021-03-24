@@ -82,18 +82,22 @@ async def next_turn(ctx):
 
     #print in each channel - missing
 
-df = pd.read_csv('./DiscordBot/data.csv',header=None)
-matrix2 = df[df.columns[0]]
-print(matrix2)
-list2 = [int(x.split()[0]) for x in matrix2[1:]]
-
 @client.command()
 async def turn(ctx):
+    df = pd.read_csv('data.csv')
+    matrix2 = df[df.columns[0]]
+    print(matrix2)
+    list2 = [int(x) for x in matrix2]
+    print('list2')
+    print(list2)
     channels_to_send=list2
     for channel_ID in channels_to_send:
-        chan =client.get_channel(channel_ID)
-        print(chan)
-        await ctx.invoke(ctx.get_command('stats'),channel=channel_ID)
+        chan=client.get_channel(int(channel_ID))
+        mess=await chan.get_partial_message(chan.last_message_id).fetch()
+        print(type(mess))
+        cont=await client.get_context(mess)
+        print(cont)        
+        await stats(cont)
 
     #Population, iq and other parameters update
 
