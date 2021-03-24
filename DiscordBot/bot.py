@@ -77,12 +77,6 @@ def buy_resource(id,resource):
     df.to_csv('data.csv',index=False)         
 
 @client.command()
-async def next_turn(ctx):
-    df=pd.read_csv('data.csv')
-
-    #print in each channel - missing
-
-@client.command()
 async def turn(ctx):
     df = pd.read_csv('data.csv')
     matrix2 = df[df.columns[0]]
