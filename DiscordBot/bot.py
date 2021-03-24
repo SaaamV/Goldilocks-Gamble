@@ -3,10 +3,11 @@ import random
 import os
 from discord.ext import commands
 import pandas as pd
+from crisis import *
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', intents = intents)
-
+    
 def convert(lst):
     res_dct = {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
     return res_dct
@@ -31,10 +32,24 @@ def buy_resource(id,resource):
     df.to_csv('data.csv',index=False)
     print(df)           
 
-                
-@client.event
+@client.command()
+async def next_turn(ctx):
+    df=pd.read_csv('data.csv')
+
+    #print in each channel - missing
+    
+    era=int(df.loc[df['id']==id,'era'])
+    crisis_for_era(era)
+    with open('parameters.csv') as para_file:
+        turn=[row.split(sep=',')[1] for row in para_file]
+        print("You are on turn",int(turn[0]),'!')
+        print("Your stats")
+        await stats(ctx)
+     
+
+'''@client.event
 async def on_message(message):
-    print(f'{message.author} sends',message.content)
+    print(f'{message.author} sends',message.content)'''
 
 @client.event
 async def on_member_join(member):
@@ -152,4 +167,4 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 
-client.run('')
+client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.jhw3LIH8FYPKIOhbloW9ohYWvIo')
