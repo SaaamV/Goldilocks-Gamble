@@ -26,12 +26,15 @@ def buy_resource(id,resource):
                 print(amount)
     
     print("out of the loop")
-    df.loc[df['id']==id,'credits']=float(df.loc[df['id']==id,'credits'])-float(df.loc[df['id']==id,'multiplier'])*cred
-    df.loc[df['id']==id,str(resource)]=float(df.loc[df['id']==id,str(resource)])+amount
-    df.to_csv('data.csv')
+    df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']+float(cred)*df.loc[df['id']==id,'multiplier']
+    df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
+    df.to_csv('data.csv',index=False)
     print(df)           
 
                 
+@client.event
+async def on_message(message):
+    print(f'{message.author} sends',message.content)
 
 @client.event
 async def on_member_join(member):
