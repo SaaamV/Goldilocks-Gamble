@@ -84,22 +84,17 @@ async def stats(ctx):
     id=ctx.channel.id
     print(id)
     print(str(df.loc[df['id']==id,'name']).split()[1])
-    embed = discord.Embed(
-        title = 'Stats',
-        description = f"Your planet : {str(df.loc[df['id']==id,'name'])}\n Current Era : { int(df.loc[df['id']==id,'era'])}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n"
+    embed=discord.Embed(title='Stats',
+        description = f"Your planet : {str(df.loc[df['id']==id,'name']).split()[1]}\n Current Era : { int(df.loc[df['id']==id,'era'])}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n"
                       f"------------------------------\n"
                       f"Resources\n"
                       f"------------------------------\n"
-                      f"Air : { float(df.loc[df['id']==id,'air'])}%\n"
-                      f"Land : { float(df.loc[df['id']==id,'land'])}%\n"
-                      f"Water : { float(f.loc[df['id']==id,'water'])}%\n"
-                      f"Flora : { float(df.loc[df['id']==id,'flora'])}%\n  ",
-        color=discord.Colour.blue()
+        ,color=discord.Colour.blue()
     )
-    embed.add_field(name='Air', value=str(float(df.loc[df['id']==id,'air'])), inline=True)
-    embed.add_field(name='Land', value=str(float(df.loc[df['id']==id,'land'])), inline=True)
-    embed.add_field(name='Water', value=str(float(df.loc[df['id']==id,'water'])), inline=True)
-    embed.add_field(name='Flora', value=str(float(df.loc[df['id']==id,'flora'])), inline=True)
+    embed.add_field(name='Air', value=float(df.loc[df['id']==id,'air']), inline=True)
+    embed.add_field(name='Land', value=float(df.loc[df['id']==id,'land']), inline=True)
+    embed.add_field(name='Water', value=float(df.loc[df['id']==id,'water']), inline=True)
+    embed.add_field(name='Flora', value=float(df.loc[df['id']==id,'flora']), inline=True)
     await ctx.send(embed=embed)
 
 @client.command()
@@ -185,4 +180,4 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 
-client.run('')
+client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.dD0eggGH7SXJCs96EOob-hLy-DA')
