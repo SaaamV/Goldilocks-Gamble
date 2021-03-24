@@ -83,7 +83,7 @@ async def stats(ctx):
     id=ctx.channel.id
     embed = discord.Embed(
         title = 'Stats',
-        description = f'Your planet : {df.loc[df['id']==id,'name']}\n Current Era : { df.loc[df['id']==id,'era']}\n Population : { df.loc[df['id']==id,'population']} \n Average IQ : { df.loc[df['id']==id,'iq']}\n'
+        description = f'Your planet : {str(df.loc[df['id']==id,'name'])}\n Current Era : { int(df.loc[df['id']==id,'era'])}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n'
                       f'------------------------------\n'
                       f'Resources\n'
                       f'------------------------------\n'
@@ -174,4 +174,4 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 
-client.run('')
+client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.Hw-gMWkEM1LeOw1sFdVh4EKXag4')
