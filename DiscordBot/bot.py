@@ -87,7 +87,6 @@ async def stats(ctx):
     print(df.loc[df['id']==id,'name'][0])
     embed = discord.Embed(
         title = 'Stats',
-<<<<<<< HEAD
         description = f'Your planet : {str(df.loc[df['id']==id,'name'])}\n Current Era : { int(df.loc[df['id']==id,'era'])}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n'
                       f'------------------------------\n'
                       f'Resources\n'
@@ -96,12 +95,6 @@ async def stats(ctx):
                       f'Land : { df.loc[df['id']==id,'land']}%\n'
                       f'Water : { df.loc[df['id']==id,'water']}%\n'
                       f'Flora : { df.loc[df['id']==id,'flora']}%\n  ',
-=======
-        description = f"Your planet : {df.loc[df['id']==id,'name'][0]}\n Current Era : { df.loc[df['id']==id,'era'][0]}\n Population : { df.loc[df['id']==id,'population'][0]} \n Average IQ : { df.loc[df['id']==id,'iq'][0]}\n"
-                      f'------------------------------\n'
-                      f'Resources\n'
-                      f'------------------------------\n',
->>>>>>> 8edfeaefc99436e434794ea92b306266a4ebd12f
         color=discord.Colour.blue()
     )
     embed.add_field(name='Air', value=str(df.loc[df['id']==id,'air'][0]), inline=True)
