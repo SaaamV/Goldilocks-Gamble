@@ -80,9 +80,14 @@ async def start(ctx):
 @client.command()
 async def stats(ctx):
     df=pd.read_csv('data.csv')
+    print("Printing stats: ", ctx.channel.name)
     id=ctx.channel.id
+    print(id)
+    print(df.loc[df['id']==id,'name'])
+    print(df.loc[df['id']==id,'name'][0])
     embed = discord.Embed(
         title = 'Stats',
+<<<<<<< HEAD
         description = f'Your planet : {str(df.loc[df['id']==id,'name'])}\n Current Era : { int(df.loc[df['id']==id,'era'])}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n'
                       f'------------------------------\n'
                       f'Resources\n'
@@ -91,10 +96,24 @@ async def stats(ctx):
                       f'Land : { df.loc[df['id']==id,'land']}%\n'
                       f'Water : { df.loc[df['id']==id,'water']}%\n'
                       f'Flora : { df.loc[df['id']==id,'flora']}%\n  ',
+=======
+        description = f"Your planet : {df.loc[df['id']==id,'name'][0]}\n Current Era : { df.loc[df['id']==id,'era'][0]}\n Population : { df.loc[df['id']==id,'population'][0]} \n Average IQ : { df.loc[df['id']==id,'iq'][0]}\n"
+                      f'------------------------------\n'
+                      f'Resources\n'
+                      f'------------------------------\n',
+>>>>>>> 8edfeaefc99436e434794ea92b306266a4ebd12f
         color=discord.Colour.blue()
     )
+    embed.add_field(name='Air', value=str(df.loc[df['id']==id,'air'][0]), inline=True)
+    embed.add_field(name='Land', value=str(df.loc[df['id']==id,'land'][0]), inline=True)
+    embed.add_field(name='Water', value=str(df.loc[df['id']==id,'water'][0]), inline=True)
+    embed.add_field(name='Flora', value=str(df.loc[df['id']==id,'flora'][0]), inline=True)
     await ctx.send(embed=embed)
 
+@client.command()
+async def id(ctx):
+    print("ID requested:", ctx.channel.id)
+    print("Channel: ", ctx.channel.name)
 
 @client.command(aliases=['8ball'])
 async def _8ball(ctx, *, question):
@@ -174,4 +193,8 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 
+<<<<<<< HEAD
 client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.Hw-gMWkEM1LeOw1sFdVh4EKXag4')
+=======
+client.run('ODIyMTg4NzU2ODUzMDYzNzAw.YFOo8w.uS5sJuMUfl6yxegHBIGZJ6WTC3g')
+>>>>>>> 8edfeaefc99436e434794ea92b306266a4ebd12f
