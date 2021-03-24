@@ -22,15 +22,11 @@ def buy_resource(id,resource):
         for row in resource_file:
             if row.split(sep=',')[0]==resource:
                 cred=row.split(sep=',')[era+1]
-                print(cred)
                 amount=row.split(sep=',')[1]
-                print(amount)
     
-    print("out of the loop")
     df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']+float(cred)*df.loc[df['id']==id,'multiplier']
     df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
-    df.to_csv('data.csv',index=False)
-    print(df)           
+    df.to_csv('data.csv',index=False)         
 
 @client.command()
 async def next_turn(ctx):
@@ -83,10 +79,21 @@ async def start(ctx):
 
 @client.command()
 async def stats(ctx):
-    print(ctx.channel.id)
     df=pd.read_csv('data.csv')
-    print(df)
-    await ctx.send(df)
+    id=ctx.channel.id
+    embed = discord.Embed(
+        title = 'Stats',
+        description = f'Your planet : {df.loc[df['id']==id,'name']}\n Current Era : { df.loc[df['id']==id,'era']}\n Population : { df.loc[df['id']==id,'population']} \n Average IQ : { df.loc[df['id']==id,'iq']}\n'
+                      f'------------------------------\n'
+                      f'Resources\n'
+                      f'------------------------------\n'
+                      f'Air : { df.loc[df['id']==id,'air']}%\n'
+                      f'Land : { df.loc[df['id']==id,'land']}%\n'
+                      f'Water : { df.loc[df['id']==id,'water']}%\n'
+                      f'Flora : { df.loc[df['id']==id,'flora']}%\n  ',
+        color=discord.Colour.blue()
+    )
+    await ctx.send(embed=embed)
 
 
 @client.command(aliases=['8ball'])
