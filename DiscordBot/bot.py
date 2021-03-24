@@ -7,10 +7,20 @@ from crisis import *
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', intents = intents)
+
+teams = 5
 #Passive parameter chart
 size = {"Small":1, "Medium":2, "Large":3} #large is good
 distance = {"Close":2, "Ideal":3, "Far":1} #ideal is good
 mass = {1:"Light", 2:"Medium", 3:"Heavy"} 
+#Crisis Chart
+crisis = {
+    1:["Floods","Famine","Drought","Tsunami","Cyclone","WW"],
+    2:["Earthquake", "Forest Fire", "PLague", "WW"],
+    3:["Fuel Shortage", "Global Warming", "Water Shortage", "Plague", "Earthquake", "War", "WW"],
+    4:["Earthquake", "COVID", "Ebola", "Solar Flare", "Nuclear Explosion", "water Shortage", "Global Warming"],
+    5:["Meteor Strike", "Fuel Shortage", "Global Warming", "AI Malfunction"]
+}
 
 def initialise():
     df=pd.read_csv('data.csv')
@@ -20,7 +30,7 @@ def initialise():
     water = {1:50, 2:60, 3:70}
     temp = {2:17 , 3:14 , 1:11}
     #Passive parameters
-    for i in range(5):
+    for i in range(teams):
         param["size"]=random.choice(list(size.keys()))
         param["distance"]=random.choice(list(distance.keys()))
         param["mass"]=mass[size[param["size"]]]
@@ -46,7 +56,9 @@ def initialise():
         df.loc[i,'flora']=flora
     print(df)
     df.to_csv('data.csv',index=False)
+
 #def era side story function
+
 #Review crisis
  
 def buy_resource(id,resource):
@@ -69,8 +81,19 @@ async def next_turn(ctx):
     df=pd.read_csv('data.csv')
 
     #print in each channel - missing
-    #Population, iq update
-    #era check
+
+    #Population, iq and other parameters update
+
+    for i in range(teams):
+        if df.loc[i,'iq']>150:
+            era=5
+        elif df.loc[i,'iq']>100:
+            era=4
+        elif df.loc[i,'iq']>85:
+            era=3
+        elif df.loc[i,'iq']>70:
+            era=2
+        df.loc[i,'era']=era
     era=int(df.loc[df['id']==id,'era'])
     crisis_for_era(era)
     with open('parameters.csv') as para_file:
@@ -123,6 +146,13 @@ async def stats(ctx):
 async def id(ctx):
     print("ID requested:", ctx.channel.id)
     print("Channel: ", ctx.channel.name)
+
+@client.command()
+async def test(ctx):
+    with open('story1.csv') as story:
+        for row in story:
+            await ctx.send(row)
+
 
 '''@client.event
 async def on_message(message):
@@ -188,4 +218,4 @@ for filename in os.listdir('./cogs'):
         client.load_extension(f"cogs.{filename[:-3]}")
 
 
-client.run('')
+client.run('NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.ObbkB6x6gkWYCNUp2-FRnRi2H2k')
