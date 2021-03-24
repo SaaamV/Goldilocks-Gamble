@@ -16,7 +16,7 @@ pollutants=100
 #random values given for variable initialisation
 
 #will use a different input method for era
-def crisis_for_era(era)
+def crisis_for_era(era):
     if era=="ancient":
         if IQ in range(10,150) and agri <0.2*TPS and water<0.35*TPS:
             print("FAMINE!")
