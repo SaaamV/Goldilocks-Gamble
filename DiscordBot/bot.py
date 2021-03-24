@@ -7,7 +7,10 @@ from crisis import *
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', intents = intents)
-    
+
+#def era side story function
+#Review crisis
+ 
 def buy_resource(id,resource):
     df=pd.read_csv('data.csv')
     cred=0
@@ -28,14 +31,16 @@ async def next_turn(ctx):
     df=pd.read_csv('data.csv')
 
     #print in each channel - missing
-    
+    #Population, iq update
+    #era check
     era=int(df.loc[df['id']==id,'era'])
     crisis_for_era(era)
     with open('parameters.csv') as para_file:
         turn=[row.split(sep=',')[1] for row in para_file]
         print("You are on turn",int(turn[0]),'!')
         print("Your stats")
-        await stats(ctx)  
+        await stats(ctx) 
+    #Crisis deployment 
 
 @client.command()
 async def buy(ctx, resource):
