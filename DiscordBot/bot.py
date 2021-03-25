@@ -43,7 +43,7 @@ def initialise():
         df.loc[i,'water']=param['water']
         df.loc[i,'land']=param['land']
         df.loc[i,'temp']=param['temp']
-
+        #define era,multiplier,si,di,credits,population,population density
         #Initial resources
         flora=random.randrange(70,95) #randomising flora diversity
         df.loc[i,'flora']=flora
@@ -59,7 +59,7 @@ def initialise():
  def buy_list():
      pass
 
-    
+
 def buy_resource(id,resource):
     df=pd.read_csv('data.csv')
     cred=0
