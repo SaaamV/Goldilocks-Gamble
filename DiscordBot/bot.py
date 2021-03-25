@@ -6,7 +6,7 @@ import pandas as pd
 import math
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
-client = commands.Bot(command_prefix = ',', intents = intents)
+client = commands.Bot(command_prefix = '.', intents = intents)
 
 teams = 5
 #Passive parameter chart
@@ -400,4 +400,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.jV6xPks-LSdF5WepgcE18gYUR8Q')
+client.run('')
