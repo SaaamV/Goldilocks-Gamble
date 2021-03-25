@@ -53,7 +53,13 @@ def initialise():
 #def era side story function
 
 #Review crisis
- 
+
+
+#shows the list of resources to buy
+ def buy_list():
+     pass
+
+    
 def buy_resource(id,resource):
     df=pd.read_csv('data.csv')
     cred=0
@@ -67,7 +73,9 @@ def buy_resource(id,resource):
     
     df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']+float(cred)*df.loc[df['id']==id,'multiplier']
     df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
-    df.to_csv('data.csv',index=False)         
+    df.to_csv('data.csv',index=False)    
+
+    #add changes in parameters based on resource value     
 
 @client.command()
 async def turn(ctx):
@@ -119,7 +127,8 @@ async def turn(ctx):
         await cont.send(("You are on turn "+turn[0]+'!'))
 
         await stats(cont)
-    #Crisis deployment 
+        #add era message
+        #Crisis deployment 
 
 @client.command()
 async def buy(ctx, resource):
