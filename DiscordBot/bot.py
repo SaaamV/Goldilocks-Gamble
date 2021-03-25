@@ -4,6 +4,7 @@ import os
 from discord.ext import commands
 import pandas as pd
 from crisis import *
+import math
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', intents = intents)
@@ -70,38 +71,54 @@ def buy_resource(id,resource):
 
 @client.command()
 async def turn(ctx):
+    turn=0
+    with open('parameters.csv','r+') as para_file:
+        turn=[row.split(sep=',')[1] for row in para_file]
+        para_file.seek(0,os.SEEK_SET)
+        para_file.write('turn,'+str(int(turn[0])+1))
+        para_file.close()
+
     df = pd.read_csv('data.csv')
     matrix2 = df[df.columns[0]]
-    print(matrix2)
     list2 = [int(x) for x in matrix2]
-    print('list2')
-    print(list2)
     channels_to_send=list2
-    for channel_ID in channels_to_send:
-        chan=client.get_channel(int(channel_ID))
-        mess=await chan.get_partial_message(chan.last_message_id).fetch()
-        cont=await client.get_context(mess)        
-        await stats(cont)
-
-    #Population, iq and other parameters update
-
-    for i in range(teams):
-        if df.loc[i,'iq']>150:
+    for id in channels_to_send:
+        water=df.loc[df['id']==id,'water']
+        land=df.loc[df['id']==id,'land']
+        pollutants=df.loc[df['id']==id,'pollutants']
+        di=df.loc[df['id']==id,'di']
+        flora=df.loc[df['id']==id,'flora']
+        size_p=df.loc[df['id']==id,'size']
+        air=df.loc[df['id']==id,'air']
+        #add di formula
+        era=df.loc[df['id']==id,'era']
+        iq=240*(1-math.exp(-di*era))
+        #add more resources in data.csv
+        if iq>150:
             era=5
-        elif df.loc[i,'iq']>100:
+        elif iq>100:
             era=4
-        elif df.loc[i,'iq']>85:
+        elif iq>85:
             era=3
-        elif df.loc[i,'iq']>70:
+        elif iq>70:
             era=2
-        df.loc[i,'era']=era
-    era=int(df.loc[df['id']==id,'era'])
-    crisis_for_era(era)
-    with open('parameters.csv') as para_file:
-        turn=[row.split(sep=',')[1] for row in para_file]
-        print("You are on turn",int(turn[0]),'!')
-        print("Your stats")
-        await stats(ctx) 
+        
+        df.loc[df['id']==id,'era']=era
+        population=df.loc[df['id']==id,'population']
+        pop_density=iq/10+1
+        si= 0.23529*water*land*(1-pollutants/100)*air*(60-air)
+        pop_capacity=(pop_density-flora/100)*land*size[str(size_p).split()[1]]*1000
+        new_pop=population*si*0.03*(1-population/pop_capacity)
+        df.loc[df['id']==id,'iq']=iq  
+        df.loc[df['id']==id,'population']=new_pop
+        df.loc[df['id']==id,'pop_density']=pop_density
+
+        chan=client.get_channel(int(id))
+        mess=await chan.get_partial_message(chan.last_message_id).fetch()
+        cont=await client.get_context(mess)
+        await cont.send(("You are on turn "+turn[0]+'!'))
+
+        await stats(cont)
     #Crisis deployment 
 
 @client.command()

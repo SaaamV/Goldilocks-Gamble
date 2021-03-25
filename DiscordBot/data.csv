@@ -1,6 +1,6 @@
-id,name,era,multiplier,credits,air,water,land,temp,population,iq,flora,size,distance,mass
-824213067659214889,team-1,0,0,0,0.17,50,50,17,0,0,88,Small,Close,Light
-824216319788318750,team-2,0,0,0,0.17,60,40,17,0,0,70,Medium,Close,Medium
-824216348150071326,team-3,0,0,0,0.17,60,40,14,0,0,92,Medium,Ideal,Medium
-824216403431260170,team-4,0,0,0,0.17,70,30,17,0,0,75,Large,Close,Heavy
-824216421030297600,team-5,0,0,0,0.17,60,40,17,0,0,71,Medium,Close,Medium
+id,name,era,multiplier,si,di,credits,air,pollutants,water,land,temp,population,pop_density,iq,flora,size,distance,mass
+824213067659214889,team-1,0,0,0,0,0,0.17,0,50,50,17,0,0,0,88,Small,Close,Light
+824216319788318750,team-2,0,0,0,0,0,0.17,0,60,40,17,0,0,0,70,Medium,Close,Medium
+824216348150071326,team-3,0,0,0,0,0,0.17,0,60,40,14,0,0,0,92,Medium,Ideal,Medium
+824216403431260170,team-4,0,0,0,0,0,0.17,0,70,30,17,0,0,0,75,Large,Close,Heavy
+824216421030297600,team-5,0,0,0,0,0,0.17,0,60,40,17,0,0,0,71,Medium,Close,Medium
