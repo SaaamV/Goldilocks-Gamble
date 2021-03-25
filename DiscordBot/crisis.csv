@@ -1,0 +1,25 @@
+Crisis,Era,Death,Water_c,Oxygen,Carbon di Oxide,Water_r,DI,Land,Flora Fauna
+Floods,1,5,40,0,0,0,0,0,0
+Drought,4,10,-30,0,0,0,0,0,0
+Drought,1,10,-30,0,0,0,0,0,0
+Water Shortage,3,5,-40,0,0,0,0,0,0
+Water Shortage,4,5,-40,0,0,0,0,0,0
+Earthquake,2,15,0,0,0,0,0,0,0
+Earthquake,3,15,0,0,0,0,0,0,0
+Earthquake,4,15,0,0,0,0,0,0,0
+Cyclone,1,20,50,0,0,0,0,0,0
+Tsunami,1,20,50,0,0,0,0,0,0
+Solar Flare,4,0,0,0,0,0,-2,0,0
+Global Warming,3,0,0,-13,10,5,0,-5,-10
+Global Warming,4,0,0,-13,10,5,0,-5,-10
+Global Warming,5,0,0,-13,10,5,0,-5,-10
+Wars,3,40,0,0,0,0,0,0,0
+Nuclear Explosion,4,40,0,0,0,0,0,-10,0
+Fuel Shortage,3,0,0,0,0,0,-1,0,0
+Fuel Shortage,5,0,0,0,0,0,-1,0,0
+Corona,4,40,0,0,0,0,0,0,0
+Ebola,4,30,0,0,0,0,0,0,0
+ai,5,20,0,0,0,0,0,0,0
+famine,1,7,-35,0,0,0,0,0,0
+plague,2,20,0,0,0,0,0,0,0
+plague,3,10,0,0,0,0,0,0,0
