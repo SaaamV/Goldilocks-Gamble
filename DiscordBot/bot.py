@@ -3,11 +3,67 @@ import random
 import os
 from discord.ext import commands
 import pandas as pd
-from crisis import *
 import math
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = ',', intents = intents)
+
+teams = 5
+#Passive parameter chart
+size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
+distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
+mass = {1:"Light", 2:"Medium", 3:"Heavy"} 
+d_era = {
+    1:"Ancient",
+    2:"Medieval",
+    3:"Industrial",
+    4:"Information",
+    5:"Future"
+}
+
+res_aliases={'oxygen':'Oxygen','co2':'Carbon Dioxide','pollutants':'Pollutants','water':'Water','land':'Land','temp':'Temperature','population':'Population','flora':'Flora and Fauna','factory':'Factory(s)','farm':'Farm(s)'}
+
+def initialise():
+    df=pd.read_csv('data.csv')
+    param = {}
+    #Active parameter chart
+    param["oxygen"] = 25 #percent oxygen
+    water = {1:50, 2:60, 3:70}
+    temp = {2:17 , 3:14 , 1:11}
+    #Passive parameters
+    for i in range(teams):
+        param["size"]=random.choice(list(size.keys()))
+        param["distance"]=random.choice(list(distance.keys()))
+        param["mass"]=param["size"]
+        
+        df.loc[i,'oxygen']=param['oxygen']
+        df.loc[i,'size']=param['size']
+        df.loc[i,'distance']=param['distance']
+        df.loc[i,'mass']=param['mass']
+
+        #Active parameters
+        param["water"] = water[param["size"]]
+        param["land"] = 100 - param["water"]
+        param["temp"] = temp[param["distance"]]
+
+        df.loc[i,'water']=param['water']
+        df.loc[i,'land']=param['land']
+        df.loc[i,'temp']=param['temp']
+        df.loc[i, 'pollutants']=0
+        df.loc[i, 'era']=1
+
+        si= round(0.000044*param["water"]*param["land"]*param["oxygen"]*(60-param["oxygen"]),2)
+        df.loc[i, 'si']=si
+        df.loc[i, 'credits']=10000
+        df.loc[i, 'iq']=10
+        df.loc[i, 'population']=1000
+        df.loc[i, 'multiplier']=round(param["water"]/(120-param["water"]),2)
+        df.loc[i, 'pop_density']=2
+        
+        #Initial resources
+        flora=random.randrange(70,95) #randomising flora diversity
+        df.loc[i,'flora']=flora
+    df.to_csv('data.csv',index=False)
 
 def crisis_for_era(df,i):
     era=df.loc[i,'era']
@@ -90,7 +146,7 @@ def crisis_for_era(df,i):
                 crisis='Solar Flare'
                 DI=DI-(0.2*DI)
             elif q==3:
-                crisis='AI Malfunction'
+                crisis='AI Coup'
                 pop=pop-(0.2*pop)
                 agri=agri-(0.5*agri)
                 industry=industry+(0.5*industry)
@@ -114,7 +170,7 @@ def crisis_for_era(df,i):
                 crisis='Fuel Shortage'
                 DI=DI-(0.02*DI)
             elif x==2:
-                crisis='AI Malfunction'
+                crisis='AI Coup'
                 pop=pop-(0.2*pop)
                 agri=agri-(0.5*agri)
                 industry=industry+(0.5*industry)
@@ -135,62 +191,6 @@ def crisis_for_era(df,i):
     df.loc[i,'pollutants']=pollutants
 
     return df,crisis
-
-
-teams = 5
-#Passive parameter chart
-size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
-distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
-mass = {1:"Light", 2:"Medium", 3:"Heavy"} 
-d_era = {
-    1:"Ancient",
-    2:"Medieval",
-    3:"Industrial",
-    4:"Information",
-    5:"Future"
-}
-
-def initialise():
-    df=pd.read_csv('data.csv')
-    param = {}
-    #Active parameter chart
-    param["oxygen"] = 25 #percent oxygen
-    water = {1:50, 2:60, 3:70}
-    temp = {2:17 , 3:14 , 1:11}
-    #Passive parameters
-    for i in range(teams):
-        param["size"]=random.choice(list(size.keys()))
-        param["distance"]=random.choice(list(distance.keys()))
-        param["mass"]=param["size"]
-        
-        df.loc[i,'oxygen']=param['oxygen']
-        df.loc[i,'size']=param['size']
-        df.loc[i,'distance']=param['distance']
-        df.loc[i,'mass']=param['mass']
-
-        #Active parameters
-        param["water"] = water[param["size"]]
-        param["land"] = 100 - param["water"]
-        param["temp"] = temp[param["distance"]]
-
-        df.loc[i,'water']=param['water']
-        df.loc[i,'land']=param['land']
-        df.loc[i,'temp']=param['temp']
-        df.loc[i, 'pollutants']=0
-        df.loc[i, 'era']=1
-
-        si= round(0.000044*param["water"]*param["land"]*param["oxygen"]*(60-param["oxygen"]),2)
-        df.loc[i, 'si']=si
-        df.loc[i, 'credits']=10000
-        df.loc[i, 'iq']=10
-        df.loc[i, 'population']=1000
-        df.loc[i, 'multiplier']=round(param["water"]/(120-param["water"]),2)
-        df.loc[i, 'pop_density']=2
-        
-        #Initial resources
-        flora=random.randrange(70,95) #randomising flora diversity
-        df.loc[i,'flora']=flora
-    df.to_csv('data.csv',index=False)
 
 async def new_era(ctx, era): #New era story and excavation choice
     await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
@@ -279,7 +279,7 @@ async def turn(ctx):
         await buy_list(cont, era)
         
         df,crisis=crisis_for_era(df,i)
-        await ctx.send('you got crisis:'+crisis)
+        await cont.send('you got crisis:'+crisis)
 
 @client.command()
 async def buy(ctx, resource):
@@ -316,15 +316,15 @@ async def stats(ctx):
     id=ctx.channel.id
     embed=discord.Embed(title='Stats',
         description = f"Your planet : {str(df.loc[df['id']==id,'name']).split()[1]}\n Current Era : { d_era[int(df.loc[df['id']==id,'era'])]}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n Credits : {float(df.loc[df['id']==id,'credits'])}\n"
-                      f"----------------------------------\n"
+                      f"-----------------------------------------------\n"
                       f"Resources\n"
-                      f"----------------------------------\n"
+                      f"-----------------------------------------------\n"
         ,color=discord.Colour.blue()
     )
-    embed.add_field(name='Oxygen', value=float(df.loc[df['id']==id,'oxygen']), inline=True)
-    embed.add_field(name='Land', value=float(df.loc[df['id']==id,'land']), inline=True)
-    embed.add_field(name='Water', value=float(df.loc[df['id']==id,'water']), inline=True)
-    embed.add_field(name='Flora', value=float(df.loc[df['id']==id,'flora']), inline=True)
+    for i in list(df.loc[df['id']==id])[13:]:
+        print(df.loc[df['id']==id,str(i)])
+        if int(df.loc[df['id']==id,str(i)])!=0:    
+            embed.add_field(name=res_aliases[str(i)], value=float(df.loc[df['id']==id,str(i)]), inline=True)
     await ctx.send(embed=embed)
 
 @client.command()
@@ -400,4 +400,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('')
+client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.jV6xPks-LSdF5WepgcE18gYUR8Q')
