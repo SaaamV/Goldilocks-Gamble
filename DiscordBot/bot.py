@@ -199,13 +199,14 @@ async def new_era(ctx, era): #New era story and excavation choice
 
 #shows the list of resources to buy
 async def buy_list(ctx, era):
+    df=pd.read_csv('data.csv')
     res_file=open('resources.csv','r')
     embed = discord.Embed(title="Resource Buy List",color=discord.Colour.red(), description='Resources available')
         #embed.set_thumbnail(url=ctx.author.avatar_url)
     for line in res_file:
         lst=line.split(sep=',')
         if int(lst[era+1]):
-            embed.add_field(name=lst[0]+' : '+lst[era+1], value='Buy '+lst[1]+' '+lst[0]+'(s)' ,inline=False)
+            embed.add_field(name=lst[0]+' : '+str(float(lst[era+1])*float(df.loc[df['id']==ctx.channel.id,'multiplier'])), value='Buy '+lst[1]+' '+lst[0]+'(s)' ,inline=False)
     await ctx.send(embed=embed)
 
 def buy_resource(id,resource):
@@ -286,7 +287,7 @@ async def buy(ctx, resource):
     team=ctx.channel.id
     print(team,resource)
     buy_resource(team,resource)
-    await ctx.send(resource + " successfully bought! \nPlease check your stats.") 
+    await ctx.send(resource + " successfully bought! \nPlease check your stats.")
 
 @client.command()
 async def start(ctx):
@@ -400,4 +401,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('')
+client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.0SKt1e3l4606engINsPeT0mayuU')
