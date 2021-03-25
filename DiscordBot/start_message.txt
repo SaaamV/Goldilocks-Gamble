@@ -1,3 +1,25 @@
-welcome
-lol
-gg
+> **Initiating Project Goldilocks...** 
+> Unknown environment detected
+> **Cache 1**: Critical Malfunction
+> **Cache 2**: Critical Malfunction
+> **Cache 3**: Critical Malfunction
+> **Cache 4**: Critical Malfunction
+> **Cache 5: Successfully Initiated**
+> 
+> **Cache status:**
+> Name: *Noah’s Ark*
+> Objective: *Help humanity Progress*
+> 
+> Searching for Human life… *Error*
+> No humans found on planet
+> Searching for secondary measures…
+> **Seed Pods found**
+> 
+> Checking planet status for habitability
+> *Planet found in database*
+> Planet Name: *4564B*
+> **Planet Environment Habitable**
+> 
+> **Activating Pod 1**
+> Planet renamed in database
+> New name:
