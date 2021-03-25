@@ -71,7 +71,14 @@ async def new_era(ctx, era): #New era story and excavation choice
 
 #shows the list of resources to buy
 async def buy_list(ctx, era):
-    pass
+    res_file=open('resources.csv','r')
+    embed = discord.Embed(title="Resource Buy List",color=discord.Colour.red(), description='Resources available')
+        #embed.set_thumbnail(url=ctx.author.avatar_url)
+    for line in res_file:
+        lst=line.split(sep=',')
+        if int(lst[era+1]):
+            embed.add_field(name=lst[0]+' : '+lst[era+1], value='Buy '+lst[1]+' '+lst[0]+'(s)' ,inline=False)
+    await ctx.send(embed=embed)
 
 def buy_resource(id,resource):
     df=pd.read_csv('data.csv')
@@ -180,9 +187,9 @@ async def stats(ctx):
     id=ctx.channel.id
     embed=discord.Embed(title='Stats',
         description = f"Your planet : {str(df.loc[df['id']==id,'name']).split()[1]}\n Current Era : { d_era[int(df.loc[df['id']==id,'era'])]}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n Credits : {float(df.loc[df['id']==id,'credits'])}\n"
-                      f"------------------------------\n"
+                      f"----------------------------------\n"
                       f"Resources\n"
-                      f"------------------------------\n"
+                      f"----------------------------------\n"
         ,color=discord.Colour.blue()
     )
     embed.add_field(name='Oxygen', value=float(df.loc[df['id']==id,'oxygen']), inline=True)
