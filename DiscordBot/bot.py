@@ -64,13 +64,14 @@ def initialise():
         df.loc[i,'flora']=flora
     df.to_csv('data.csv',index=False)
 
-#def era side story function
+async def new_era(ctx, era): #New era story and excavation choice
+    await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
 
 #Review crisis
 
 #shows the list of resources to buy
 async def buy_list(ctx, era):
-    
+    pass
 
 def buy_resource(id,resource):
     df=pd.read_csv('data.csv')
@@ -102,6 +103,10 @@ async def turn(ctx):
     df = pd.read_csv('data.csv')
     for i in range(teams):
         id = df.loc[i,'id']
+        chan=client.get_channel(int(id))
+        mess=await chan.get_partial_message(chan.last_message_id).fetch()
+        cont=await client.get_context(mess)
+
         water=df.loc[i,'water']
         land=df.loc[i,'land']
         pollutants=df.loc[i,'pollutants']
@@ -122,7 +127,8 @@ async def turn(ctx):
         elif iq>70:
             era=2
         if df.loc[i,'era']!=era:
-            await cont.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
+            await new_era(cont,era)
+
         df.loc[i,'era']=era
         population=df.loc[i,'population']
         pop_density=int(iq/10+1)
@@ -132,11 +138,8 @@ async def turn(ctx):
         df.loc[i,'iq']=iq  
         df.loc[i,'population']=new_pop
         df.loc[i,'pop_density']=pop_density
-        chan=client.get_channel(int(id))
-        mess=await chan.get_partial_message(chan.last_message_id).fetch()
-        cont=await client.get_context(mess)
-        await cont.send(("Turn "+turn[0]+' started!'))
 
+        await cont.send(("Turn "+turn[0]+' started!'))
         await stats(cont)
         await buy_list(cont, era)
         #Crisis deployment
