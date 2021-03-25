@@ -162,18 +162,17 @@ async def buy(ctx, resource):
 async def start(ctx):
     #only to dev channel
     #add story to main channel
-    with open('./start_message.txt', 'r') as start_message:
-        embed = discord.Embed(color=discord.Colour.red(), description='r[A]men')
-        embed.set_thumbnail(url=ctx.author.avatar_url)
-        ct=0
-        for line in start_message:
-            ct=ct+1
-            embed.add_field(name=str(ct), value=line, inline=False)
-        await ctx.send(embed=embed)
-    
+    message=""
+    df = pd.read_csv('data.csv')
+    for line in open('./start_message.txt',encoding='utf8'):
+        message = message + line
+    embed=discord.Embed(title='Prologue', 
+        description = f'{message}',
+        color = discord.Colour.red())
+    await ctx.send(embed=embed)
+
     initialise()
 
-    df = pd.read_csv('data.csv')
     for i in range(teams):
         id = df.loc[i,'id']
         chan=client.get_channel(int(id))
@@ -271,4 +270,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('')
+client.run('NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.OVjwaIvA0sAMB3TwV5Nm9qbHul4')
