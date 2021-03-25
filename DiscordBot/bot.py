@@ -11,54 +11,63 @@ client = commands.Bot(command_prefix = '.', intents = intents)
 
 teams = 5
 #Passive parameter chart
-size = {"Small":1, "Medium":2, "Large":3} #large is good
-distance = {"Close":2, "Ideal":3, "Far":1} #ideal is good
+size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
+distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
 mass = {1:"Light", 2:"Medium", 3:"Heavy"} 
 
 def initialise():
+    print("Initialising")
     df=pd.read_csv('data.csv')
     param = {}
     #Active parameter chart
-    param["air"] = 0.17 #percent oxygen
+    param["oxygen"] = 25 #percent oxygen
     water = {1:50, 2:60, 3:70}
     temp = {2:17 , 3:14 , 1:11}
+    print("Looping")
     #Passive parameters
     for i in range(teams):
         param["size"]=random.choice(list(size.keys()))
         param["distance"]=random.choice(list(distance.keys()))
-        param["mass"]=mass[size[param["size"]]]
-
-        df.loc[i,'air']=param['air']
+        param["mass"]=param["size"]
+        
+        df.loc[i,'oxygen']=param['oxygen']
         df.loc[i,'size']=param['size']
         df.loc[i,'distance']=param['distance']
         df.loc[i,'mass']=param['mass']
+
         #Active parameters
-        param["water"] = water[size[param["size"]]]
+        param["water"] = water[param["size"]]
         param["land"] = 100 - param["water"]
-        isPure = False
-        if param["size"] == "Small":
-            isPure = True
-        param["temp"] = temp[distance[param["distance"]]]
+        param["temp"] = temp[param["distance"]]
 
         df.loc[i,'water']=param['water']
         df.loc[i,'land']=param['land']
         df.loc[i,'temp']=param['temp']
-        #define era,multiplier,si,di,credits,population,population density
+        df.loc[i, 'pollutants']=0
+        df.loc[i, 'era']=1
+
+        si= round(0.000044*param["water"]*param["land"]*param["oxygen"]*(60-param["oxygen"]),2)
+        print(si)
+        df.loc[i, 'si']=si
+        df.loc[i, 'credits']=10000
+        df.loc[i, 'iq']=10
+        df.loc[i, 'population']=1000
+        df.loc[i, 'multiplier']=round(param["water"]/(120-param["water"]),2)
+        df.loc[i, 'pop_density']=2
+        
         #Initial resources
         flora=random.randrange(70,95) #randomising flora diversity
         df.loc[i,'flora']=flora
-    print(df)
+    print("Initialised")
     df.to_csv('data.csv',index=False)
 
 #def era side story function
 
 #Review crisis
 
-
 #shows the list of resources to buy
- def buy_list():
-     pass
-
+def buy_list():
+    pass
 
 def buy_resource(id,resource):
     df=pd.read_csv('data.csv')
@@ -79,6 +88,7 @@ def buy_resource(id,resource):
 
 @client.command()
 async def turn(ctx):
+    #give some credits
     turn=0
     with open('parameters.csv','r+') as para_file:
         turn=[row.split(sep=',')[1] for row in para_file]
@@ -97,7 +107,7 @@ async def turn(ctx):
         di=df.loc[df['id']==id,'di']
         flora=df.loc[df['id']==id,'flora']
         size_p=df.loc[df['id']==id,'size']
-        air=df.loc[df['id']==id,'air']
+        oxygen=df.loc[df['id']==id,'oxygen']
         #add di formula
         era=df.loc[df['id']==id,'era']
         iq=240*(1-math.exp(-di*era))
@@ -110,17 +120,15 @@ async def turn(ctx):
             era=3
         elif iq>70:
             era=2
-        
         df.loc[df['id']==id,'era']=era
         population=df.loc[df['id']==id,'population']
-        pop_density=iq/10+1
-        si= 0.23529*water*land*(1-pollutants/100)*air*(60-air)
-        pop_capacity=(pop_density-flora/100)*land*size[str(size_p).split()[1]]*1000
+        pop_density=int(iq/10+1)
+        si= 0.00004*water*land*(1-pollutants/100)*oxygen*(60-oxygen)
+        pop_capacity=(pop_density-flora/100)*land*int(size_p)*1000
         new_pop=population*si*0.03*(1-population/pop_capacity)
         df.loc[df['id']==id,'iq']=iq  
         df.loc[df['id']==id,'population']=new_pop
         df.loc[df['id']==id,'pop_density']=pop_density
-
         chan=client.get_channel(int(id))
         mess=await chan.get_partial_message(chan.last_message_id).fetch()
         cont=await client.get_context(mess)
@@ -128,7 +136,7 @@ async def turn(ctx):
 
         await stats(cont)
         #add era message
-        #Crisis deployment 
+        #Crisis deployment
 
 @client.command()
 async def buy(ctx, resource):
@@ -163,7 +171,7 @@ async def stats(ctx):
                       f"------------------------------\n"
         ,color=discord.Colour.blue()
     )
-    embed.add_field(name='Air', value=float(df.loc[df['id']==id,'air']), inline=True)
+    embed.add_field(name='Oxygen', value=float(df.loc[df['id']==id,'oxygen']), inline=True)
     embed.add_field(name='Land', value=float(df.loc[df['id']==id,'land']), inline=True)
     embed.add_field(name='Water', value=float(df.loc[df['id']==id,'water']), inline=True)
     embed.add_field(name='Flora', value=float(df.loc[df['id']==id,'flora']), inline=True)
