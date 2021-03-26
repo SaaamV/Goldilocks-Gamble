@@ -354,5 +354,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id=str([line for line in open('client_id.txt')][0])
+client_id=''
 client.run(client_id)
