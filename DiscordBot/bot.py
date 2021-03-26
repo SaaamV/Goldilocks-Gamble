@@ -109,7 +109,6 @@ def crisis_for_era(i):
     satellite=df.loc[i,'satellite']
     pollutants=df.loc[i,'pollutants']
     crisis='none'
-
     cf=pd.read_csv('crisis.csv')
     era_df=cf.loc[cf['era']==era,'crisis']
 
@@ -134,9 +133,10 @@ def crisis_for_era(i):
     chance = random.random()
     if chance < 0.3:
         crisis = random.choice(era_list)
-
+    death=0
     if crisis!='none':
-        population=int(population*(1-float(cf.loc[cf['crisis']==crisis,'death'])/100))
+        death = int(population*float(cf.loc[cf['crisis']==crisis,'death'])/100)
+        population=int(population)-death
         for index in cf.loc[cf['crisis']==crisis].keys()[3:]:
             df.loc[i,str(index)]=locals()[str(index)]*(1-float(cf.loc[cf['crisis']==crisis,index])/100)
     if crisis == 'flare':
@@ -155,7 +155,7 @@ def crisis_for_era(i):
     df.loc[i,'di']=di
     df.loc[i,'flora']=flora
     df.loc[i,'temp']=temp'''
-    return crisis
+    return crisis,death
 
 async def new_era(ctx, era):
     await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
@@ -280,11 +280,10 @@ async def turn(ctx):
             df.loc[i,'pop_density']=pop_density
             df.loc[i,'credits'] = df.loc[i,'credits'] + (si*di*(3**era))
             await cont.send(("Turn "+turn[0]+' started!'))
-            crisis=crisis_for_era(i)
-            
+            crisis,death=crisis_for_era(i)
             await stats(cont)
-            if crisis:
-                await cont.send('Your civilization is hit by '+crisis)
+            if crisis!='none':
+                await cont.send('Your civilization is hit by '+crisis+'.\nYou lost '+str(death)+' people.')
             df.to_csv('data.csv',index=False)
 
 @client.command()
@@ -372,5 +371,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.pms4cHzu0gFhcQWO7mpPx3L8F-w'
+client_id=''
 client.run(client_id)
