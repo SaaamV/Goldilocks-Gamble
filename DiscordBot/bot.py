@@ -8,7 +8,8 @@ import math
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
 df = pd.read_csv('data.csv')
-teams = 6
+teams = len(df)
+print(len(df))
 asked = False
 #add aliases to commands
 
@@ -23,7 +24,7 @@ d_era = {
     5:"Future"
 }
 
-res_aliases={'oxygen':'Oxygen','co2':'Carbon Dioxide','pollutants':'Pollutants','water':'Water','land':'Land','temp':'Temperature','population':'Population','flora':'Flora and Fauna','factory':'Factory(s)','farm':'Farm(s)'}
+res_aliases={'seeds':'Seed Pods','oxygen':'Oxygen','co2':'Carbon Dioxide','pollutants':'Pollutants','water':'Water','land':'Land','temp':'Temperature','population':'Population','flora':'Flora and Fauna','factory':'Factory(s)','farm':'Farm(s)'}
 
 def initialise():
     param = {}
