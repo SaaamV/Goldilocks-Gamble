@@ -8,7 +8,7 @@ import math
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
 df = pd.read_csv('data.csv')
-teams = 5
+teams = 6
 asked = False
 #add aliases to commands
 
@@ -197,7 +197,7 @@ def crisis_for_era(i):
 
     return df,crisis
 
-async def new_era(ctx, era): #New era story and excavation choice
+async def new_era(ctx, era):
     await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
     message=""
     if era < 3:
@@ -228,7 +228,6 @@ async def story(ctx, answer):
             
 #Review crisis
 
-#shows the list of resources to buy
 async def buy_list(ctx, era):
     res_file=open('resources.csv','r')
     embed = discord.Embed(title="Resource Buy List",color=discord.Colour.red(), description='Resources available')
@@ -253,18 +252,21 @@ def buy_resource(id,resource):
         return False
     else:
         df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']-float(cred)*df.loc[df['id']==id,'multiplier']
-        df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
-        di_i = float(amount)/df.loc[df['id']==id,str(resource)]
+        if resource.lower() == 'seeds':
+            seed = int(3*int(df.loc[df['id']==id,'population'])/100 + float(df.loc[df['id']==id,'si'])*10)
+            df.loc[df['id']==id,'population']=int(df.loc[df['id']==id,'population']+seed)
+        else:
+            df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
+            di_i = float(amount)/df.loc[df['id']==id,str(resource)]
 
         for index in rf.keys()[1:]:
             df.loc[df['id']==id,index]=df.loc[df['id']==id,index]+float(rf.loc[rf['f']==resource,index])
+        
 
         df.loc[df['id']==id,'di']=df.loc[df['id']==id,'di']+round(di_i,2) 
         df.to_csv('data.csv',index=False)
         
-        return True
-
-    #add changes in parameters based on resource value     
+        return True  
 
 @client.command()
 async def turn(ctx):
@@ -297,9 +299,9 @@ async def turn(ctx):
                 era=5
             elif iq>100:
                 era=4
-            elif iq>85:
+            elif iq>60:
                 era=3
-            elif iq>70:
+            elif iq>30:
                 era=2
             if df.loc[i,'era']!=era:
                 await new_era(cont,era)
@@ -309,7 +311,7 @@ async def turn(ctx):
             pop_density=int(iq/10+1)
             si= 0.00004*water*land*(1-pollutants/100)*oxygen*(60-oxygen)
             pop_capacity=(pop_density-flora/100)*land*int(size_p)*1000
-            new_pop=population*si*0.03*(1-population/pop_capacity)
+            new_pop=int(population*si*0.03*(1-population/pop_capacity))
             df.loc[i,'iq']=iq  
             df.loc[i,'population']=new_pop
             df.loc[i,'pop_density']=pop_density
@@ -408,4 +410,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.5SjPbD0zocSyXbh3OsrhV9OpRRA')
+client.run('NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.n4M4qk4QTI3tphV7SqapneVyuXA')
