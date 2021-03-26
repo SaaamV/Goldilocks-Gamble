@@ -103,15 +103,37 @@ def crisis_for_era(i): # satellite flare factory ai farm drought floods
     co2=df.loc[i,'co2']
     industry=df.loc[i,'factory']
     satellite=df.loc[i,'satellite']
+    pollutants=df.loc[i,'pollutants']
     crisis='none'
 
     cf=pd.read_csv('crisis.csv')
     era_df=cf.loc[cf['era']==era]
     
-    #for i in [2:]:
-        
+    era_df = list(era_df)  
+    if 'floods' in era_df and water < 40:
+        era_df.remove('floods')
+    if 'drought' in era_df and water > 30:
+        era_df.remove('drought')
+    if 'water' in era_df and water > 40:
+        era_df.remove('water')
+    if 'cyclone' in era_df and water < 50: 
+        era_df.remove('cyclone')
+    if 'tsunami' in era_df and water < 50:
+        era_df.remove('tsunami')
+    if 'ozone' in era_df and pollutants < 50:
+        era_df.remove('ozone')
+    if 'warming' in era_df and (o2 > 13 and co2 < 10):
+        era_df.remove('warming')
+    if 'famine' in era_df and (((pop/1000)*agri) < 1  and water > 35):
+        era_df.remove('famine')
     
-    df.loc[i,'era']=era
+    chance = random.random()
+    if chance < 0.5:
+        crisis = random.choice(era_df)
+
+    if crisis:
+        
+
     df.loc[i,'water']=water
     df.loc[i,'land']=land
     df.loc[i,'di']=DI
@@ -119,8 +141,6 @@ def crisis_for_era(i): # satellite flare factory ai farm drought floods
     df.loc[i,'agriculture']=agri
     df.loc[i,'flora']=FandF
     df.loc[i,'temp']=temp
-    df.loc[i,'oxygen']=o2
-    df.loc[i,'co2']=co2
     df.loc[i,'factory']=industry
     df.loc[i,'satellite']=satellite
     return crisis
@@ -153,8 +173,6 @@ async def story(ctx, answer):
                 pass #add epilogue 2
         if answer == 'y':
             df.loc[df['id']==id,story] = df.loc[df['id']==id,story] + 1
-            
-#Review crisis
 
 async def buy_list(ctx, era):
     res_file=open('resources.csv','r')
@@ -243,10 +261,11 @@ async def turn(ctx):
             df.loc[i,'pop_density']=pop_density
             df.loc[i,'credits'] = df.loc[i,'credits'] + (si*di*(3**era))
             await cont.send(("Turn "+turn[0]+' started!'))
-            await stats(cont)
-            
             crisis=crisis_for_era(i)
-            await cont.send('you got crisis:'+crisis)
+            
+            await stats(cont)
+            if crisis:
+                await cont.send('Your civilization is hit by '+crisis)
             df.to_csv('data.csv',index=False)
 
 @client.command()
