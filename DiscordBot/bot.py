@@ -20,9 +20,26 @@ d_era = {
     2:"Medieval",
     3:"Industrial",
     4:"Information",
-    5:"Future"
-}
-
+    5:"Future"}
+crisis_aliases={
+    'floods':'Floods',
+    'drought':'Droughts',
+    'famine':'Famine',
+    'tsunami':'Tsunami',
+    'cyclone':'Cyclone',
+    'earthquake':'Earthquake',
+    'fire':'Forest Fires',
+    'plague':'Plague',
+    'fuel':'Fuel Shortage',
+    'wars':'Great Wars',
+    'warming':'Global Warming',
+    'water':'Water Shortage',
+    'corona':'Corona',
+    'ebola':'Ebola',
+    'flare':'Solar Flare',
+    'nuclear':'Nuclear Disaster',
+    'ozone':'Ozone Depletion',
+    'ai':'AI Coup'}
 res_aliases={'seeds':'Seed Pods','oxygen':'Oxygen','co2':'Carbon Dioxide','pollutants':'Pollutants','water':'Water','land':'Land','temp':'Temperature','population':'Population','flora':'Flora and Fauna','factory':'Factory(s)','farm':'Farm(s)'}
 
 def initialise():
@@ -169,14 +186,12 @@ def buy_resource(id,resource):
         else:
             df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
             di_i = float(amount)/df.loc[df['id']==id,str(resource)]
-
+            df.loc[df['id']==id,'di']=df.loc[df['id']==id,'di']+round(di_i,2) 
         for index in rf.keys()[1:]:
             df.loc[df['id']==id,index]=df.loc[df['id']==id,index]+float(rf.loc[rf['f']==resource,index])
-        
 
-        df.loc[df['id']==id,'di']=df.loc[df['id']==id,'di']+round(di_i,2) 
         df.to_csv('data.csv',index=False)
-        
+
         return True  
 
 @client.command()
