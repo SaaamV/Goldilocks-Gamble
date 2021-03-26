@@ -33,6 +33,10 @@ def initialise():
     temp = {2:17 , 3:14 , 1:11}
     #Passive parameters
     for i in range(teams):
+
+        for res in df.keys()[3:]:
+            df.loc[i,res]=0
+
         param["size"]=random.choice(list(size.keys()))
         param["distance"]=random.choice(list(distance.keys()))
         param["mass"]=param["size"]
@@ -60,8 +64,6 @@ def initialise():
         df.loc[i, 'population']=1000
         df.loc[i, 'multiplier']=round(param["water"]/(120-param["water"]),2)
         df.loc[i, 'pop_density']=2
-        for res in df.keys()[20:]:
-            df.loc[i,res]=0
         
         #Initial resources
         flora=random.randrange(70,95) #randomising flora diversity
@@ -255,7 +257,7 @@ def buy_resource(id,resource):
         di_i = float(amount)/df.loc[df['id']==id,str(resource)]
 
         for index in rf.keys()[1:]:
-            df.loc[df['id']==id,index]=df.loc[df['id']==id,index]-rf.loc[rf['f']==resource,index]
+            df.loc[df['id']==id,index]=df.loc[df['id']==id,index]+float(rf.loc[rf['f']==resource,index])
 
         df.loc[df['id']==id,'di']=df.loc[df['id']==id,'di']+round(di_i,2) 
         df.to_csv('data.csv',index=False)
@@ -315,7 +317,6 @@ async def turn(ctx):
             print(si*di*3**era)
             await cont.send(("Turn "+turn[0]+' started!'))
             await stats(cont)
-            await buy_list(cont, era)
             
             crisis=crisis_for_era(i)
             await cont.send('you got crisis:'+crisis)
@@ -354,6 +355,7 @@ async def start(ctx):
 @client.command()
 async def stats(ctx):
     id=ctx.channel.id
+    era=int(df.loc[df['id']==id,'era'])
     embed=discord.Embed(title='Stats',
         description = f"Your planet : {str(df.loc[df['id']==id,'name']).split()[1]}\n Current Era : { d_era[int(df.loc[df['id']==id,'era'])]}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n Credits : {float(df.loc[df['id']==id,'credits'])}\n"
                       f"-----------------------------------------------\n"
@@ -362,10 +364,10 @@ async def stats(ctx):
         ,color=discord.Colour.blue()
     )
     for i in list(df.loc[df['id']==id])[14:]:
-        print(df.loc[df['id']==id,str(i)])
-        if int(df.loc[df['id']==id,str(i)])!=0:    
+        if float(df.loc[df['id']==id,str(i)])>0:    
             embed.add_field(name=res_aliases[str(i)], value=float(df.loc[df['id']==id,str(i)]), inline=True)
     await ctx.send(embed=embed)
+    await buy_list(ctx, era)
 
 @client.command()
 async def id(ctx):
@@ -406,4 +408,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('')
+client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.5SjPbD0zocSyXbh3OsrhV9OpRRA')
