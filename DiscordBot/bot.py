@@ -6,7 +6,7 @@ import pandas as pd
 import math
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
-client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
+client = commands.Bot(command_prefix = ',', description="type .help for available commands", intents = intents,help_command=None)
 df = pd.read_csv('data.csv')
 teams = len(df)
 asked = False
@@ -132,7 +132,7 @@ def crisis_for_era(i): # satellite flare factory ai farm drought floods
         crisis = random.choice(era_df)
 
     if crisis:
-        
+        pass
 
     df.loc[i,'water']=water
     df.loc[i,'land']=land
@@ -149,9 +149,12 @@ async def new_era(ctx, era):
     await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
     message=""
     if era < 3:
-        for line in open('./story'+era+'.txt',encoding='utf8'):
+        print("Era 1:" )
+        for line in open('./story'+str(era)+'.txt',encoding='utf8'):
+            print("L",line)
             message = message + line
         await ctx.send(message)
+        print("Era 2")
     elif era < 5:
         await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
         asked = True
@@ -271,7 +274,6 @@ async def turn(ctx):
 @client.command()
 async def buy(ctx, resource):
     team=ctx.channel.id
-    print(team,resource)
     unlocked=buy_resource(team,resource)
     if unlocked:
         await ctx.send(res_aliases[resource] + " successfully bought! \nPlease check your stats.")
@@ -354,5 +356,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id=''
+client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.Qo_MZiTkMrGXyYDYQ-erCYm5Xkw'
 client.run(client_id)
