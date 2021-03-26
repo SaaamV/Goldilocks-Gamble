@@ -68,7 +68,7 @@ def initialise():
         df.loc[i,'flora']=flora
     df.to_csv('data.csv',index=False)
 
-def crisis_for_era(df,i):
+def crisis_for_era(i):
     era=df.loc[i,'era']
     water=df.loc[i,'water']
     land=df.loc[i,'land']
@@ -289,7 +289,7 @@ async def turn(ctx):
         await stats(cont)
         await buy_list(cont, era)
         
-        df,crisis=crisis_for_era(df,i)
+        crisis=crisis_for_era(i)
         await cont.send('you got crisis:'+crisis)
         df.to_csv('data.csv',index=False)
 
