@@ -246,7 +246,11 @@ def buy_resource(id,resource):
     else:
         df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']-float(cred)*df.loc[df['id']==id,'multiplier']
         df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
-        di_i = float(amount)/df.lo c[df['id']==id,str(resource)]
+        di_i = float(amount)/df.loc[df['id']==id,str(resource)]
+
+        for index in rf.keys()[1:]:
+            df.loc[df['id']==id,index]=df.loc[df['id']==id,index]-rf.loc[rf['f']==resource,index]
+
         df.loc[df['id']==id,'di']=df.loc[df['id']==id,'di']+round(di_i,2) 
         df.to_csv('data.csv',index=False)
         
@@ -395,4 +399,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('')
+client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.BB8n_wfKKRWGm-BkvTZiaXlZ-_k')
