@@ -33,6 +33,9 @@ def initialise():
     water = {1:50, 2:60, 3:70}
     temp = {2:17 , 3:14 , 1:11}
     #Passive parameters
+    with open('parameters.csv','w') as para_file:
+            para_file.write('turn,1')
+            para_file.close()
     for i in range(teams):
 
         for res in df.keys()[3:]:
