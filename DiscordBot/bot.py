@@ -20,9 +20,26 @@ d_era = {
     2:"Medieval",
     3:"Industrial",
     4:"Information",
-    5:"Future"
-}
-
+    5:"Future"}
+crisis_aliases={
+    'floods':'Floods',
+    'drought':'Droughts',
+    'famine':'Famine',
+    'tsunami':'Tsunami',
+    'cyclone':'Cyclone',
+    'earthquake':'Earthquake',
+    'fire':'Forest Fires',
+    'plague':'Plague',
+    'fuel':'Fuel Shortage',
+    'wars':'Great Wars',
+    'warming':'Global Warming',
+    'water':'Water Shortage',
+    'corona':'Corona',
+    'ebola':'Ebola',
+    'flare':'Solar Flare',
+    'nuclear':'Nuclear Disaster',
+    'ozone':'Ozone Depletion',
+    'ai':'AI Coup'}
 res_aliases={'seeds':'Seed Pods','oxygen':'Oxygen','co2':'Carbon Dioxide','pollutants':'Pollutants','water':'Water','land':'Land','temp':'Temperature','population':'Population','flora':'Flora and Fauna','factory':'Factory(s)','farm':'Farm(s)'}
 
 def initialise():
