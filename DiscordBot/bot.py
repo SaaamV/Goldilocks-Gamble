@@ -10,7 +10,6 @@ client = commands.Bot(command_prefix = '.', description="type .help for availabl
 df = pd.read_csv('data.csv')
 teams = 5
 asked = False
-#Passive parameter chart
 #add aliases to commands
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
@@ -208,13 +207,20 @@ async def new_era(ctx, era): #New era story and excavation choice
         asked = True
     else:
         if df.loc[df['id']==id,story] == 2:
+            for line in open('./story'+era+'.txt',encoding='utf8'):
+                message = message + line
+                await ctx.send(message)
             await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
-
-
+            asked = True
 
 async def story(ctx, answer):
     if asked == True:
         id = ctx.channel.id
+        if df.loc[df['id']==id,era] == 5 :
+            if answer == 'y' and df.loc[df['id']==id,story] == 2:
+                pass #add epilogue 1
+            else:
+                pass #add epilogue 2
         if answer == 'y':
             df.loc[df['id']==id,story] = df.loc[df['id']==id,story] + 1
             
@@ -260,59 +266,60 @@ def buy_resource(id,resource):
 
 @client.command()
 async def turn(ctx):
-    #give some credits
-    asked = False
-    turn=0
-    with open('parameters.csv','r+') as para_file:
-        turn=[row.split(sep=',')[1] for row in para_file]
-        para_file.seek(0,os.SEEK_SET)
-        para_file.write('turn,'+str(int(turn[0])+1))
-        para_file.close()
+    if ctx.channel.id == 824221175995432961:
+        asked = False
+        turn=0
+        with open('parameters.csv','r+') as para_file:
+            turn=[row.split(sep=',')[1] for row in para_file]
+            para_file.seek(0,os.SEEK_SET)
+            para_file.write('turn,'+str(int(turn[0])+1))
+            para_file.close()
 
-    for i in range(teams):
-        id = df.loc[i,'id']
-        chan=client.get_channel(int(id))
-        mess=await chan.get_partial_message(chan.last_message_id).fetch()
-        cont=await client.get_context(mess)
+        for i in range(teams):
+            id = df.loc[i,'id']
+            chan=client.get_channel(int(id))
+            mess=await chan.get_partial_message(chan.last_message_id).fetch()
+            cont=await client.get_context(mess)
 
-        water=df.loc[i,'water']
-        land=df.loc[i,'land']
-        pollutants=df.loc[i,'pollutants']
-        di=df.loc[i,'di']
-        flora=df.loc[i,'flora']
-        size_p=df.loc[i,'size']
-        oxygen=df.loc[i,'oxygen']
-        era=df.loc[i,'era']
-        iq=240*(1-math.exp(-di*era))
+            water=df.loc[i,'water']
+            land=df.loc[i,'land']
+            pollutants=df.loc[i,'pollutants']
+            di=df.loc[i,'di']
+            flora=df.loc[i,'flora']
+            size_p=df.loc[i,'size']
+            oxygen=df.loc[i,'oxygen']
+            era=df.loc[i,'era']
+            iq=240*(1-math.exp(-di*era))
 
-        if iq>150:
-            era=5
-        elif iq>100:
-            era=4
-        elif iq>85:
-            era=3
-        elif iq>70:
-            era=2
-        if df.loc[i,'era']!=era:
-            await new_era(cont,era)
+            if iq>150:
+                era=5
+            elif iq>100:
+                era=4
+            elif iq>85:
+                era=3
+            elif iq>70:
+                era=2
+            if df.loc[i,'era']!=era:
+                await new_era(cont,era)
 
-        df.loc[i,'era']=era
-        population=df.loc[i,'population']
-        pop_density=int(iq/10+1)
-        si= 0.00004*water*land*(1-pollutants/100)*oxygen*(60-oxygen)
-        pop_capacity=(pop_density-flora/100)*land*int(size_p)*1000
-        new_pop=population*si*0.03*(1-population/pop_capacity)
-        df.loc[i,'iq']=iq  
-        df.loc[i,'population']=new_pop
-        df.loc[i,'pop_density']=pop_density
-
-        await cont.send(("Turn "+turn[0]+' started!'))
-        await stats(cont)
-        await buy_list(cont, era)
-        
-        crisis=crisis_for_era(i)
-        await cont.send('you got crisis:'+crisis)
-        df.to_csv('data.csv',index=False)
+            df.loc[i,'era']=era
+            population=df.loc[i,'population']
+            pop_density=int(iq/10+1)
+            si= 0.00004*water*land*(1-pollutants/100)*oxygen*(60-oxygen)
+            pop_capacity=(pop_density-flora/100)*land*int(size_p)*1000
+            new_pop=population*si*0.03*(1-population/pop_capacity)
+            df.loc[i,'iq']=iq  
+            df.loc[i,'population']=new_pop
+            df.loc[i,'pop_density']=pop_density
+            df.loc[i,'credits'] = df.loc[i,'credits'] + (si*di*(3**era))
+            print(si*di*3**era)
+            await cont.send(("Turn "+turn[0]+' started!'))
+            await stats(cont)
+            await buy_list(cont, era)
+            
+            crisis=crisis_for_era(i)
+            await cont.send('you got crisis:'+crisis)
+            df.to_csv('data.csv',index=False)
 
 @client.command()
 async def buy(ctx, resource):
@@ -326,23 +333,23 @@ async def buy(ctx, resource):
 
 @client.command()
 async def start(ctx):
-    #only to dev channel
-    message=""
-    for line in open('./start_message.txt',encoding='utf8'):
-        message = message + line
-    embed=discord.Embed(title='Prologue', 
-        description = f'{message}',
-        color = discord.Colour.red())
-    await ctx.send(embed=embed)
+    if ctx.channel.id == 824221175995432961:
+        message=""
+        for line in open('./start_message.txt',encoding='utf8'):
+            message = message + line
+        embed=discord.Embed(title='Prologue', 
+            description = f'{message}',
+            color = discord.Colour.red())
+        await ctx.send(embed=embed)
 
-    initialise()
+        initialise()
 
-    for i in range(teams):
-        id = df.loc[i,'id']
-        chan=client.get_channel(int(id))
-        mess=await chan.get_partial_message(chan.last_message_id).fetch()
-        cont=await client.get_context(mess)
-        await stats(cont)
+        for i in range(teams):
+            id = df.loc[i,'id']
+            chan=client.get_channel(int(id))
+            mess=await chan.get_partial_message(chan.last_message_id).fetch()
+            cont=await client.get_context(mess)
+            await stats(cont)
 
 @client.command()
 async def stats(ctx):
@@ -354,7 +361,7 @@ async def stats(ctx):
                       f"-----------------------------------------------\n"
         ,color=discord.Colour.blue()
     )
-    for i in list(df.loc[df['id']==id])[13:]:
+    for i in list(df.loc[df['id']==id])[14:]:
         print(df.loc[df['id']==id,str(i)])
         if int(df.loc[df['id']==id,str(i)])!=0:    
             embed.add_field(name=res_aliases[str(i)], value=float(df.loc[df['id']==id,str(i)]), inline=True)
@@ -399,4 +406,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.BB8n_wfKKRWGm-BkvTZiaXlZ-_k')
+client.run('')
