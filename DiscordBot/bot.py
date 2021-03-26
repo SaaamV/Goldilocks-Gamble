@@ -88,7 +88,11 @@ def crisis_for_era(i): # satellite flare factory ai farm drought floods
     satellite=df.loc[i,'satellite']
     crisis='none'
 
+    cf=pd.read_csv('crisis.csv')
+    era_df=cf.loc[cf['era']==era]
     
+    #for i in [2:]:
+        
     
     df.loc[i,'era']=era
     df.loc[i,'water']=water
@@ -316,4 +320,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.5fJiARYNPhpILR0gTtoP_TC9ghI')
+client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.IS9y29sXs_EJwEWVHkZFBSHKLlQ')
