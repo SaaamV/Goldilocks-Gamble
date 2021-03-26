@@ -197,6 +197,13 @@ def crisis_for_era(df,i):
 
 async def new_era(ctx, era): #New era story and excavation choice
     await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
+    message=""
+    if era < 3:
+        for line in open('./story'+era+'.txt',encoding='utf8'):
+            message = message + line
+        await ctx.send(message)
+    elif era < 5:
+        await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact")
 
 #Review crisis
 
