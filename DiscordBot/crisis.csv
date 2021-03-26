@@ -1,25 +1,27 @@
-Crisis,Era,Death,Water_c,Oxygen,Carbon_dioxide,Water_r,DI,Land,Flora
-Floods,1,5,40,0,0,0,0,0,0
-Drought,4,10,-30,0,0,0,0,0,0
-Drought,1,10,-30,0,0,0,0,0,0
-Water Shortage,3,5,-40,0,0,0,0,0,0
-Water Shortage,4,5,-40,0,0,0,0,0,0
-Earthquake,2,15,0,0,0,0,0,0,0
-Earthquake,3,15,0,0,0,0,0,0,0
-Earthquake,4,15,0,0,0,0,0,0,0
-Cyclone,1,20,50,0,0,0,0,0,0
-Tsunami,1,20,50,0,0,0,0,0,0
-Solar Flare,4,0,0,0,0,0,-2,0,0
-Global Warming,3,0,0,-13,10,5,0,-5,-10
-Global Warming,4,0,0,-13,10,5,0,-5,-10
-Global Warming,5,0,0,-13,10,5,0,-5,-10
-Wars,3,40,0,0,0,0,0,0,0
-Nuclear Explosion,4,40,0,0,0,0,0,-10,0
-Fuel Shortage,3,0,0,0,0,0,-1,0,0
-Fuel Shortage,5,0,0,0,0,0,-1,0,0
-Corona,4,40,0,0,0,0,0,0,0
-Ebola,4,30,0,0,0,0,0,0,0
-ai,5,20,0,0,0,0,0,0,0
-famine,1,7,-35,0,0,0,0,0,0
-plague,2,20,0,0,0,0,0,0,0
-plague,3,10,0,0,0,0,0,0,0
+crisis,era,death,water,di,land,flora,temp
+floods,1,5,0,0,0,0,0
+drought,1,10,0,0,0,0,0
+famine,1,7,0,0,0,0,0
+tsunami,1,20,0,0,0,0,0
+cyclone,1,20,0,0,0,0,0
+earthquake,2,15,0,0,0,0,0
+fire,2,0,0,0,0,-10,0
+plague,2,10,0,0,0,0,0
+earthquake,3,15,0,0,0,0,0
+fuel,3,0,0,-10,0,0,0
+wars,3,40,0,0,0,0,0
+plague,3,10,0,0,0,0,0
+warming,3,0,5,0,-5,-10,8
+water,3,5,0,0,0,0,0
+earthquake,4,15,0,0,0,0,0
+fuel,4,0,0,-10,0,0,0
+corona,4,40,0,0,0,0,0
+ebola,4,30,0,0,0,0,0
+flare,4,0,0,-20,0,0,0
+nuclear,4,60,0,0,0,-30,0
+water,4,5,0,0,0,0,0
+warming,4,0,5,0,-5,-10,8
+ozone,5,5,0,0,0,0,5
+fuel,5,0,0,-10,0,0,0
+warming,5,0,5,0,-5,-10,8
+ai,5,20,0,0,0,0,0
