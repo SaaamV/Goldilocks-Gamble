@@ -6,10 +6,12 @@ import pandas as pd
 import math
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
-client = commands.Bot(command_prefix = '.', intents = intents)
-
+client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
+df = pd.read_csv('data.csv')
 teams = 5
 #Passive parameter chart
+#add aliases to commands
+
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
 mass = {1:"Light", 2:"Medium", 3:"Heavy"} 
@@ -24,7 +26,6 @@ d_era = {
 res_aliases={'oxygen':'Oxygen','co2':'Carbon Dioxide','pollutants':'Pollutants','water':'Water','land':'Land','temp':'Temperature','population':'Population','flora':'Flora and Fauna','factory':'Factory(s)','farm':'Farm(s)'}
 
 def initialise():
-    df=pd.read_csv('data.csv')
     param = {}
     #Active parameter chart
     param["oxygen"] = 25 #percent oxygen
@@ -59,6 +60,8 @@ def initialise():
         df.loc[i, 'population']=1000
         df.loc[i, 'multiplier']=round(param["water"]/(120-param["water"]),2)
         df.loc[i, 'pop_density']=2
+        for res in df.keys()[20:]:
+            df.loc[i,res]=0
         
         #Initial resources
         flora=random.randrange(70,95) #randomising flora diversity
@@ -199,7 +202,6 @@ async def new_era(ctx, era): #New era story and excavation choice
 
 #shows the list of resources to buy
 async def buy_list(ctx, era):
-    df=pd.read_csv('data.csv')
     res_file=open('resources.csv','r')
     embed = discord.Embed(title="Resource Buy List",color=discord.Colour.red(), description='Resources available')
         #embed.set_thumbnail(url=ctx.author.avatar_url)
@@ -210,7 +212,6 @@ async def buy_list(ctx, era):
     await ctx.send(embed=embed)
 
 def buy_resource(id,resource):
-    df=pd.read_csv('data.csv')
     cred=0
     amount=0
     era=int(df.loc[df['id']==id,'era'])
@@ -219,10 +220,13 @@ def buy_resource(id,resource):
             if row.split(sep=',')[0].lower()==resource:
                 cred=row.split(sep=',')[era+1]
                 amount=row.split(sep=',')[1]
-    
-    df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']-float(cred)*df.loc[df['id']==id,'multiplier']
-    df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
-    df.to_csv('data.csv',index=False)   
+    if float(cred)==0:
+        return False
+    else:
+        df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']-float(cred)*df.loc[df['id']==id,'multiplier']
+        df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
+        df.to_csv('data.csv',index=False)
+        return True
 
     #add changes in parameters based on resource value     
 
@@ -236,7 +240,6 @@ async def turn(ctx):
         para_file.write('turn,'+str(int(turn[0])+1))
         para_file.close()
 
-    df = pd.read_csv('data.csv')
     for i in range(teams):
         id = df.loc[i,'id']
         chan=client.get_channel(int(id))
@@ -281,20 +284,23 @@ async def turn(ctx):
         
         df,crisis=crisis_for_era(df,i)
         await cont.send('you got crisis:'+crisis)
+        df.to_csv('data.csv',index=False)
 
 @client.command()
 async def buy(ctx, resource):
     team=ctx.channel.id
     print(team,resource)
-    buy_resource(team,resource)
-    await ctx.send(resource + " successfully bought! \nPlease check your stats.")
+    unlocked=buy_resource(team,resource)
+    if unlocked:
+        await ctx.send(res_aliases[resource] + " successfully bought! \nPlease check your stats.")
+    else:
+        await ctx.send("Resource not available.")
 
 @client.command()
 async def start(ctx):
     #only to dev channel
     #add story to main channel
     message=""
-    df = pd.read_csv('data.csv')
     for line in open('./start_message.txt',encoding='utf8'):
         message = message + line
     embed=discord.Embed(title='Prologue', 
@@ -313,7 +319,6 @@ async def start(ctx):
 
 @client.command()
 async def stats(ctx):
-    df=pd.read_csv('data.csv')
     id=ctx.channel.id
     embed=discord.Embed(title='Stats',
         description = f"Your planet : {str(df.loc[df['id']==id,'name']).split()[1]}\n Current Era : { d_era[int(df.loc[df['id']==id,'era'])]}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n Credits : {float(df.loc[df['id']==id,'credits'])}\n"
@@ -357,34 +362,6 @@ async def on_command_error(ctx, error):
         await ctx.send("Command doesn't exist")
 
 @client.command()
-@commands.has_permissions(manage_messages = True)
-async def clear(clx, amount = 10):
-    await clx.channel.purge(limit=amount)
-
-@client.command()
-async def kick(ctx, member : discord.Member, *, reason = None):
-    await member.kick(reason=reason)
-    await ctx.send(f"Kicked {member.mention}")
-
-@client.command()
-async def ban(ctx, member : discord.Member, *, reason = None):
-    await member.ban(reason=reason)
-    await ctx.send(f"Banned {member.mention}")
-
-@client.command()
-async def unban(ctx, *, member):
-    banned_users = await ctx.guild.bans()
-    member_name, member_discriminator = member.split('#')
-
-    for ban_entry in banned_users:
-        user = ban_entry.user
-
-        if(user.name, user.discriminator) == (member_name, member_discriminator):
-            await ctx.guild.unban(user)
-            await ctx.send(f"Unbanned {user.mention}")
-            return
-
-@client.command()
 async def load(ctx, extension):
     client.load_extension(f"cogs.{extension}")
 
@@ -401,4 +378,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run('NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.0SKt1e3l4606engINsPeT0mayuU')
+client.run('')
