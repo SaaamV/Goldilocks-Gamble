@@ -1,0 +1,19 @@
+```This is all it takes, 1 miscalculated variable, 1 decimal too short of the perfect figure, 1 miscomprehended line, for the world to fall apart. For me to fail father all over again.
+
+I need to be better. I need to be faster. I need to reach further.```
+
+**Unknown voice** : Eureka! We were able to successfully go through 578 test cases out of 590!
+ 
+**Father** : That’s not good enough! We need to have a perfect run for it to be even remotely viable. There’s no room for error, we can’t leave anything to chance.
+
+**Unknown voice** : John, you’re being too harsh on it. You know we deliberately made the test cases much tougher than they ought to be. The fact that our creation can navigate its way through, even when everything is working against it, is absolutely commendable. It is beautiful, and is proof that we’ve made it. 
+
+**Father** : (sighs) I know, I know. It did indeed exceed my expectations as well, but I still need it to do better. Afterall, would you be willing to take a chance with ‘IT’ around?
+
+**Unknown voice** : It’s just rumors, John. You can’t possibly believe it’s still around now, can you? You're just being paranoid. It has been shut down for good, there is no chance of it ever returning.
+
+**Father** : Perhaps. I certainly hope you’re right about this. 
+
+<image fades>
+
+> Jason : Terminating sequence…

@@ -1,0 +1,16 @@
+> Jason : New memory sequence found; Initiating...
+
+**Unknown voice** : Alright let’s take it from the top one more time. Set the parameters to omega-3. Initiate test sequence argo-16. And, GO!
+
+```I feel that rush again. The rush I’m all too familiar with. The race, it’s on. The race against whom you ask?
+
+Well the universe, ofcourse. It’s a race of variables, it’s a race of constants. It’s a race against static readings, it’s a race for losing vulnerability.
+My task is simple. To read the universe faster than it can write itself. To manipulate my surroundings. To do whatever is possible to sustain life, to preserve it, and to help it grow. 
+
+I race past hundreds of test cases and millions of lines of data, this is the fastest I’ve been.
+I’m going to make it. I can make this a perfect run. No errors. No blunders. No hiccups.
+
+No barrie-.. no no no no NOOO..```
+
+<test sequence argo-16 failed>
+
