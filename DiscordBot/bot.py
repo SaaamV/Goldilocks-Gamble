@@ -13,6 +13,8 @@ asked = False
 #add aliases to commands
 #Too much initial credits
 #IQ equation too steep
+#Flora cap 100
+#add .story to .help
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
@@ -92,7 +94,7 @@ def initialise():
         df.loc[i,'flora']=flora
     df.to_csv('data.csv',index=False)
 
-def crisis_for_era(i): # satellite flare factory ai farm drought floods
+def crisis_for_era(i): 
     era=df.loc[i,'era']
     water=df.loc[i,'water']
     land=df.loc[i,'land']
@@ -135,29 +137,31 @@ def crisis_for_era(i): # satellite flare factory ai farm drought floods
 
     if crisis!='none':
         population=int(population*(1-float(cf.loc[cf['crisis']==crisis,'death'])/100))
-        print('pop changed')
         for index in cf.loc[cf['crisis']==crisis].keys()[3:]:
-            print(index)
-            print((1-float(cf.loc[cf['crisis']==crisis,index])/100))
             df.loc[i,str(index)]=locals()[str(index)]*(1-float(cf.loc[cf['crisis']==crisis,index])/100)
-            print('success',locals()[str(index)])
+    if crisis == 'flare':
+        satellite = int(satellite*0.8)
+    elif crisis == 'ai':
+        factory = int(factory*1.2)
+    elif crisis ==  'floods' or crisis == 'drought':
+        farm = int(farm*0.9)
 
+    df.loc[i,'population']=population
+    df.loc[i,'farm']=farm
+    df.loc[i,'factory']=factory
+    df.loc[i,'satellite']=satellite
     '''df.loc[i,'water']=water
     df.loc[i,'land']=land
     df.loc[i,'di']=di
-    df.loc[i,'population']=population
-    df.loc[i,'farm']=farm
     df.loc[i,'flora']=flora
-    df.loc[i,'temp']=temp
-    df.loc[i,'factory']=factory
-    df.loc[i,'satellite']=satellite'''
+    df.loc[i,'temp']=temp'''
     return crisis
 
 async def new_era(ctx, era):
     await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
     
     if era < 3:
-        print("Era 1:" )
+        await ctx.send("You have uncovered a memory Cache.")
         message=""
         for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
             message = message + line
@@ -166,7 +170,6 @@ async def new_era(ctx, era):
         for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
             message = message + line
         await ctx.send(message)
-        print("Era 2")
     elif era < 5:
         await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
         asked = True
