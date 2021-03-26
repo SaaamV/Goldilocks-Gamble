@@ -9,6 +9,7 @@ intents = discord.Intents(messages = True, guilds = True, reactions = True, memb
 client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
 df = pd.read_csv('data.csv')
 teams = 5
+asked = False
 #Passive parameter chart
 #add aliases to commands
 
@@ -203,8 +204,20 @@ async def new_era(ctx, era): #New era story and excavation choice
             message = message + line
         await ctx.send(message)
     elif era < 5:
-        await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact")
+        await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
+        asked = True
+    else:
+        if df.loc[df['id']==id,story] == 2:
+            await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
 
+
+
+async def story(ctx, answer):
+    if asked == True:
+        id = ctx.channel.id
+        if answer == 'y':
+            df.loc[df['id']==id,story] = df.loc[df['id']==id,story] + 1
+            
 #Review crisis
 
 #shows the list of resources to buy
@@ -221,10 +234,11 @@ async def buy_list(ctx, era):
 def buy_resource(id,resource):
     cred=0
     amount=0
+    rf = pd.read_csv('mapping.csv')
     era=int(df.loc[df['id']==id,'era'])
     with open('resources.csv') as resource_file:
         for row in resource_file:
-            if row.split(sep=',')[0].lower()==resource:
+            if row.split(sep=',')[0].lower()==resource.lower():
                 cred=row.split(sep=',')[era+1]
                 amount=row.split(sep=',')[1]
     if float(cred)==0:
@@ -232,7 +246,10 @@ def buy_resource(id,resource):
     else:
         df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']-float(cred)*df.loc[df['id']==id,'multiplier']
         df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
+        di_i = float(amount)/df.lo c[df['id']==id,str(resource)]
+        df.loc[df['id']==id,'di']=df.loc[df['id']==id,'di']+round(di_i,2) 
         df.to_csv('data.csv',index=False)
+        
         return True
 
     #add changes in parameters based on resource value     
@@ -240,6 +257,7 @@ def buy_resource(id,resource):
 @client.command()
 async def turn(ctx):
     #give some credits
+    asked = False
     turn=0
     with open('parameters.csv','r+') as para_file:
         turn=[row.split(sep=',')[1] for row in para_file]
@@ -260,10 +278,9 @@ async def turn(ctx):
         flora=df.loc[i,'flora']
         size_p=df.loc[i,'size']
         oxygen=df.loc[i,'oxygen']
-        #add di formula
         era=df.loc[i,'era']
         iq=240*(1-math.exp(-di*era))
-        #add more resources in data.csv
+
         if iq>150:
             era=5
         elif iq>100:
@@ -306,7 +323,6 @@ async def buy(ctx, resource):
 @client.command()
 async def start(ctx):
     #only to dev channel
-    #add story to main channel
     message=""
     for line in open('./start_message.txt',encoding='utf8'):
         message = message + line
@@ -344,12 +360,6 @@ async def stats(ctx):
 async def id(ctx):
     print("ID requested:", ctx.channel.id)
     print("Channel: ", ctx.channel.name)
-
-@client.command()
-async def test(ctx):
-    with open('story1.csv') as story:
-        for row in story:
-            await ctx.send(row)
 
 '''@client.event
 async def on_message(message):
