@@ -182,14 +182,12 @@ def buy_resource(id,resource):
         else:
             df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
             di_i = float(amount)/df.loc[df['id']==id,str(resource)]
-
+            df.loc[df['id']==id,'di']=df.loc[df['id']==id,'di']+round(di_i,2) 
         for index in rf.keys()[1:]:
             df.loc[df['id']==id,index]=df.loc[df['id']==id,index]+float(rf.loc[rf['f']==resource,index])
-        
 
-        df.loc[df['id']==id,'di']=df.loc[df['id']==id,'di']+round(di_i,2) 
         df.to_csv('data.csv',index=False)
-        
+
         return True  
 
 @client.command()
