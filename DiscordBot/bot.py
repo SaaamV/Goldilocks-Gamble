@@ -11,6 +11,8 @@ df = pd.read_csv('data.csv')
 teams = len(df)
 asked = False
 #add aliases to commands
+#Too much initial credits
+#IQ equation too steep
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
@@ -153,11 +155,15 @@ def crisis_for_era(i): # satellite flare factory ai farm drought floods
 
 async def new_era(ctx, era):
     await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
-    message=""
+    
     if era < 3:
         print("Era 1:" )
-        for line in open('./story'+str(era)+'.txt',encoding='utf8'):
-            print("L",line)
+        message=""
+        for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
+            message = message + line
+        await ctx.send(message)
+        message=""
+        for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
             message = message + line
         await ctx.send(message)
         print("Era 2")
@@ -166,6 +172,7 @@ async def new_era(ctx, era):
         asked = True
     else:
         if df.loc[df['id']==id,story] == 2:
+            message=""
             for line in open('./story'+era+'.txt',encoding='utf8'):
                 message = message + line
                 await ctx.send(message)
@@ -362,5 +369,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.BCyJ90v88e5YHjvV9rke4UZjESc'
+client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.pms4cHzu0gFhcQWO7mpPx3L8F-w'
 client.run(client_id)
