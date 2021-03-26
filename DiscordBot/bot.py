@@ -94,55 +94,61 @@ def crisis_for_era(i): # satellite flare factory ai farm drought floods
     era=df.loc[i,'era']
     water=df.loc[i,'water']
     land=df.loc[i,'land']
-    DI=df.loc[i,'di']
-    pop=df.loc[i,'population']
-    agri=df.loc[i,'farm']
-    FandF=df.loc[i,'flora']
+    di=df.loc[i,'di']
+    population=df.loc[i,'population']
+    farm=df.loc[i,'farm']
+    flora=df.loc[i,'flora']
     temp=df.loc[i,'temp']
-    o2=df.loc[i,'oxygen']
+    oxygen=df.loc[i,'oxygen']
     co2=df.loc[i,'co2']
-    industry=df.loc[i,'factory']
+    factory=df.loc[i,'factory']
     satellite=df.loc[i,'satellite']
     pollutants=df.loc[i,'pollutants']
     crisis='none'
 
     cf=pd.read_csv('crisis.csv')
-    era_df=cf.loc[cf['era']==era]
-    
-    era_df = list(era_df)  
-    if 'floods' in era_df and water < 40:
-        era_df.remove('floods')
-    if 'drought' in era_df and water > 30:
-        era_df.remove('drought')
-    if 'water' in era_df and water > 40:
-        era_df.remove('water')
-    if 'cyclone' in era_df and water < 50: 
-        era_df.remove('cyclone')
-    if 'tsunami' in era_df and water < 50:
-        era_df.remove('tsunami')
-    if 'ozone' in era_df and pollutants < 50:
-        era_df.remove('ozone')
-    if 'warming' in era_df and (o2 > 13 and co2 < 10):
-        era_df.remove('warming')
-    if 'famine' in era_df and (((pop/1000)*agri) < 1  and water > 35):
-        era_df.remove('famine')
+    era_df=cf.loc[cf['era']==era,'crisis']
+
+    era_list=list(era_df)
+    if 'floods' in era_list and water < 40:
+        era_list.remove('floods')
+    if 'drought' in era_list and water > 30:
+        era_list.remove('drought')
+    if 'water' in era_list and water > 40:
+        era_list.remove('water')
+    if 'cyclone' in era_list and water < 50: 
+        era_list.remove('cyclone')
+    if 'tsunami' in era_list and water < 50:
+        era_list.remove('tsunami')
+    if 'ozone' in era_list and pollutants < 50:
+        era_list.remove('ozone')
+    if 'warming' in era_list and (oxygen > 13 and co2 < 10):
+        era_list.remove('warming')
+    if 'famine' in era_list and (1000*farm/population > 1  and water > 35):
+        era_list.remove('famine')
     
     chance = random.random()
-    if chance < 0.5:
-        crisis = random.choice(era_df)
+    if chance < 0.3:
+        crisis = random.choice(era_list)
 
-    if crisis:
-        pass
+    if crisis!='none':
+        population=int(population*(1-float(cf.loc[cf['crisis']==crisis,'death'])/100))
+        print('pop changed')
+        for index in cf.loc[cf['crisis']==crisis].keys()[3:]:
+            print(index)
+            print((1-float(cf.loc[cf['crisis']==crisis,index])/100))
+            df.loc[i,str(index)]=locals()[str(index)]*(1-float(cf.loc[cf['crisis']==crisis,index])/100)
+            print('success',locals()[str(index)])
 
-    df.loc[i,'water']=water
+    '''df.loc[i,'water']=water
     df.loc[i,'land']=land
-    df.loc[i,'di']=DI
-    df.loc[i,'population']=pop
-    df.loc[i,'agriculture']=agri
-    df.loc[i,'flora']=FandF
+    df.loc[i,'di']=di
+    df.loc[i,'population']=population
+    df.loc[i,'farm']=farm
+    df.loc[i,'flora']=flora
     df.loc[i,'temp']=temp
-    df.loc[i,'factory']=industry
-    df.loc[i,'satellite']=satellite
+    df.loc[i,'factory']=factory
+    df.loc[i,'satellite']=satellite'''
     return crisis
 
 async def new_era(ctx, era):
@@ -356,5 +362,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.Qo_MZiTkMrGXyYDYQ-erCYm5Xkw'
+client_id='NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.BCyJ90v88e5YHjvV9rke4UZjESc'
 client.run(client_id)
