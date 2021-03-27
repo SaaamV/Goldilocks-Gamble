@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-commands_dict={'help':'Show all available commands','stats':'Show your planet\'s stats','buy [resource name]':'Buy [resource]'}
+commands_dict={'help':'Show all available commands','stats':'Show your planet\'s stats','buy [resource name] [quantity]':'Buy [quantity] [resource(s)]','story [yes/no]':'Agree/Disagree to follow side story'}
 class Basic(commands.Cog):
 
     def __init__(self, client):
@@ -8,13 +8,26 @@ class Basic(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        await self.client.change_presence(status=discord.Status.online)
+        await self.client.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening,name=' .help'))
         print("Bot is ready.")
+
+    @commands.Cog.listener()
+    async def on_member_join(self,member):
+        print(f"{member} has joined the server.")
+
+    @commands.Cog.listener()
+    async def on_member_remove(self,member):
+        print(f"{member} has left the server.")
+
+    @commands.Cog.listener()
+    async def on_command_error(self,ctx, error):
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.send("Command doesn't exist")
 
     @commands.command()
     async def help(self, ctx):
         embed=discord.Embed(title='Available Commands',
-        description = "please use prefix (.) for example - .stats"
+        description = "please use prefix \'.\' for example - .stats"
         ,color=discord.Colour.green()
         )
         for key in commands_dict.keys():

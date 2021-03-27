@@ -6,25 +6,29 @@ import pandas as pd
 import math
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
-client = commands.Bot(command_prefix = ',', description="type .help for available commands", intents = intents,help_command=None)
-df = pd.read_csv('data.csv')
+client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
+df = pd.read_csv('data.csv',index_col=0)
 teams = len(df)
 asked = False
 #add aliases to commands
 #Too much initial credits
 #IQ equation too steep
 #Flora cap 100
-#add .story to .help
+#credits exhaust message, stop transactions
+#fix resource bought message
+#show population increase/decrease in embed
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
 mass = {1:"Light", 2:"Medium", 3:"Heavy"} 
+
 d_era = {
     1:"Ancient",
     2:"Medieval",
     3:"Industrial",
     4:"Information",
     5:"Future"}
+
 crisis_aliases={
     'floods':'Floods',
     'drought':'Droughts',
@@ -44,55 +48,78 @@ crisis_aliases={
     'nuclear':'Nuclear Disaster',
     'ozone':'Ozone Depletion',
     'ai':'AI Coup'}
-res_aliases={'seeds':'Seed Pods','oxygen':'Oxygen','co2':'Carbon Dioxide','pollutants':'Pollutants','water':'Water','land':'Land','temp':'Temperature','population':'Population','flora':'Flora and Fauna','factory':'Factory(s)','farm':'Farm(s)'}
+
+res_aliases={
+    'seeds':'Seed Pods',
+    'oxygen':'Oxygen',
+    'co2':'Carbon Dioxide',
+    'pollute':'Pollutants',
+    'water':'Water',
+    'land':'Land',
+    'temp':'Temperature',
+    'population':'Population',
+    'biomes':'Biomes',
+    'factory':'Factory(s)',
+    'farm':'Farm(s)'}
+
+initial_values={
+    'era':1,
+    'story':0,
+    'size':0,
+    'distance':0,
+    'mass':0,
+    'mult':0,
+    'si':0,
+    'di':0,
+    'credits':10000.0,
+    'population':1000,
+    'iq':10.0,
+    'pdensity':2,
+    'oxygen':25.0,
+    'co2':0,
+    'pollute':0,
+    'water':0,
+    'land':0,
+    'temp':0,
+    'biomes':0,
+    'farm':0,
+    'factory':0,
+    'mine':0,
+    'ai':0,
+    'satellite':0,
+    'dyson':0}
 
 def initialise():
-    param = {}
     #Active parameter chart
-    param["oxygen"] = 25 #percent oxygen
     water = {1:50, 2:60, 3:70}
     temp = {2:17 , 3:14 , 1:11}
     #Passive parameters
     with open('parameters.csv','w') as para_file:
             para_file.write('turn,1')
             para_file.close()
-    for i in range(teams):
 
-        for res in df.keys()[3:]:
-            df.loc[i,res]=0
-
-        param["size"]=random.choice(list(size.keys()))
-        param["distance"]=random.choice(list(distance.keys()))
-        param["mass"]=param["size"]
-        
-        df.loc[i,'oxygen']=param['oxygen']
-        df.loc[i,'size']=param['size']
-        df.loc[i,'distance']=param['distance']
-        df.loc[i,'mass']=param['mass']
+    for i in range(len(df.index)):
+        for res in range(2,len(df.keys())):
+            df.iloc[i,res]=0
+        initial_values['size']=random.choice(list(size.keys()))
+        initial_values['distance']=random.choice(list(distance.keys()))
+        initial_values['mass']=initial_values['size'] 
 
         #Active parameters
-        param["water"] = water[param["size"]]
-        param["land"] = 100 - param["water"]
-        param["temp"] = temp[param["distance"]]
+        initial_values['water'] = water[initial_values['size']]
+        initial_values['land'] = 100 - initial_values['water']
+        initial_values['temp'] = temp[initial_values['distance']]
 
-        df.loc[i,'water']=param['water']
-        df.loc[i,'land']=param['land']
-        df.loc[i,'temp']=param['temp']
-        df.loc[i, 'pollutants']=0
-        df.loc[i, 'era']=1
-
-        si= round(0.000044*param["water"]*param["land"]*param["oxygen"]*(60-param["oxygen"]),2)
-        df.loc[i, 'si']=si
-        df.loc[i, 'credits']=10000
-        df.loc[i, 'iq']=10
-        df.loc[i, 'population']=1000
-        df.loc[i, 'multiplier']=round(param["water"]/(120-param["water"]),2)
-        df.loc[i, 'pop_density']=2
+        si= round(0.000044*initial_values['water']*initial_values['land']*initial_values['oxygen']*(60-initial_values['oxygen']),2)
+        initial_values['mult']=round(initial_values['water']/(120-initial_values['water']),2)
         
         #Initial resources
-        flora=random.randrange(70,95) #randomising flora diversity
-        df.loc[i,'flora']=flora
-    df.to_csv('data.csv',index=False)
+        initial_values['biomes']=random.randrange(40,60) #randomising flora and fauna diversity
+        value_list=list(initial_values.values())
+        
+        for res in range(1,len(df.keys())):
+            df.iloc[i,res]=value_list[res-1]
+    df.to_csv('data.csv')
 
 def crisis_for_era(i): 
     era=df.loc[i,'era']
@@ -101,13 +128,13 @@ def crisis_for_era(i):
     di=df.loc[i,'di']
     population=df.loc[i,'population']
     farm=df.loc[i,'farm']
-    flora=df.loc[i,'flora']
+    biomes=df.loc[i,'biomes']
     temp=df.loc[i,'temp']
     oxygen=df.loc[i,'oxygen']
     co2=df.loc[i,'co2']
     factory=df.loc[i,'factory']
     satellite=df.loc[i,'satellite']
-    pollutants=df.loc[i,'pollutants']
+    pollute=df.loc[i,'pollute']
     crisis='none'
     cf=pd.read_csv('crisis.csv')
     era_df=cf.loc[cf['era']==era,'crisis']
@@ -123,7 +150,7 @@ def crisis_for_era(i):
         era_list.remove('cyclone')
     if 'tsunami' in era_list and water < 50:
         era_list.remove('tsunami')
-    if 'ozone' in era_list and pollutants < 50:
+    if 'ozone' in era_list and pollute < 50:
         era_list.remove('ozone')
     if 'warming' in era_list and (oxygen > 13 and co2 < 10):
         era_list.remove('warming')
@@ -174,7 +201,7 @@ async def new_era(ctx, era):
         await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
         asked = True
     else:
-        if df.loc[df['id']==id,story] == 2:
+        if df.loc[id,'story'] == 2:
             message=""
             for line in open('./story'+era+'.txt',encoding='utf8'):
                 message = message + line
@@ -182,32 +209,32 @@ async def new_era(ctx, era):
             await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
             asked = True
 
+@client.command()
 async def story(ctx, answer):
     if asked == True:
         id = ctx.channel.id
-        if df.loc[df['id']==id,era] == 5 :
-            if answer == 'y' and df.loc[df['id']==id,story] == 2:
+        if df.loc[id,'era'] == 5 :
+            if answer == 'yes' and df.loc[id,'story'] == 2:
                 pass #add epilogue 1
             else:
                 pass #add epilogue 2
-        if answer == 'y':
-            df.loc[df['id']==id,story] = df.loc[df['id']==id,story] + 1
+        if answer == 'yes':
+            df.loc[id,'story'] = df.loc[id,'story'] + 1
 
 async def buy_list(ctx, era):
     res_file=open('resources.csv','r')
     embed = discord.Embed(title="Resource Buy List",color=discord.Colour.red(), description='Resources available')
-        #embed.set_thumbnail(url=ctx.author.avatar_url)
     for line in res_file:
         lst=line.split(sep=',')
         if int(lst[era+1]):
-            embed.add_field(name=lst[0]+' : '+str(float(lst[era+1])*float(df.loc[df['id']==ctx.channel.id,'multiplier'])), value='Buy '+lst[1]+' '+lst[0]+'(s)' ,inline=False)
+            embed.add_field(name=res_aliases[lst[0]]+' : '+str(float(lst[era+1])*float(df.loc[int(ctx.channel.id),'mult'])), value='Buy '+lst[1]+' '+res_aliases[lst[0]] ,inline=False)
     await ctx.send(embed=embed)
 
-def buy_resource(id,resource):
+def buy_resource(id,resource,quantity):
     cred=0
     amount=0
     rf = pd.read_csv('mapping.csv')
-    era=int(df.loc[df['id']==id,'era'])
+    era=int(df.loc[id,'era'])
     with open('resources.csv') as resource_file:
         for row in resource_file:
             if row.split(sep=',')[0].lower()==resource.lower():
@@ -216,18 +243,18 @@ def buy_resource(id,resource):
     if float(cred)==0:
         return False
     else:
-        df.loc[df['id']==id,'credits']=df.loc[df['id']==id,'credits']-float(cred)*df.loc[df['id']==id,'multiplier']
+        df.loc[id,'credits']=df.loc[id,'credits']-int(quantity)*float(cred)*df.loc[id,'mult']
         if resource.lower() == 'seeds':
-            seed = int(3*int(df.loc[df['id']==id,'population'])/100 + float(df.loc[df['id']==id,'si'])*10)
-            df.loc[df['id']==id,'population']=int(df.loc[df['id']==id,'population']+seed)
+            seed = int(3*int(df.loc[id,'population'])/100 + float(df.loc[id,'si'])*10)
+            df.loc[id,'population']=int(df.loc[id,'population']+int(quantity)*seed)
         else:
-            df.loc[df['id']==id,str(resource)]=df.loc[df['id']==id,str(resource)]+float(amount)
-            di_i = float(amount)/df.loc[df['id']==id,str(resource)]
-            df.loc[df['id']==id,'di']=df.loc[df['id']==id,'di']+round(di_i,2) 
+            df.loc[id,str(resource)]=df.loc[id,str(resource)]+int(quantity)*float(amount)
+            di_i = int(quantity)*float(amount)/df.loc[id,str(resource)]
+            df.loc[id,'di']=df.loc[id,'di']+round(di_i,2) 
         for index in rf.keys()[1:]:
-            df.loc[df['id']==id,index]=df.loc[df['id']==id,index]+float(rf.loc[rf['f']==resource,index])
+            df.loc[id,index]=df.loc[id,index]+int(quantity)*float(rf.loc[rf['f']==resource,index])
 
-        df.to_csv('data.csv',index=False)
+        df.to_csv('data.csv')
 
         return True  
 
@@ -243,19 +270,19 @@ async def turn(ctx):
             para_file.close()
 
         for i in range(teams):
-            id = df.loc[i,'id']
+            id = [int(x) for x in df.index][i]
             chan=client.get_channel(int(id))
             mess=await chan.get_partial_message(chan.last_message_id).fetch()
             cont=await client.get_context(mess)
 
-            water=df.loc[i,'water']
-            land=df.loc[i,'land']
-            pollutants=df.loc[i,'pollutants']
-            di=df.loc[i,'di']
-            flora=df.loc[i,'flora']
-            size_p=df.loc[i,'size']
-            oxygen=df.loc[i,'oxygen']
-            era=df.loc[i,'era']
+            water=df.loc[id,'water']
+            land=df.loc[id,'land']
+            pollute=df.loc[id,'pollute']
+            di=df.loc[id,'di']
+            biomes=df.loc[id,'biomes']
+            size_p=df.loc[id,'size']
+            oxygen=df.loc[id,'oxygen']
+            era=df.loc[id,'era']
             iq=10 + 240*(1-math.exp(-di*era))
 
             if iq>150:
@@ -266,32 +293,32 @@ async def turn(ctx):
                 era=3
             elif iq>30:
                 era=2
-            if df.loc[i,'era']!=era:
+            if df.loc[id,'era']!=era:
                 await new_era(cont,era)
 
-            df.loc[i,'era']=era
-            population=df.loc[i,'population']
-            pop_density=int(iq/10+1)
-            si= 0.00004*water*land*(1-pollutants/100)*oxygen*(60-oxygen)
-            pop_capacity=(pop_density-flora/100)*land*int(size_p)*1000
+            df.loc[id,'era']=era
+            population=df.loc[id,'population']
+            pdensity=int(iq/10+1)
+            si= 0.00004*water*land*(1-pollute/100)*oxygen*(60-oxygen)
+            pop_capacity=(pdensity-biomes/100)*land*int(size_p)*1000
             new_pop=int(population*si*0.03*(1-population/pop_capacity))
-            df.loc[i,'iq']=iq  
-            df.loc[i,'population']=new_pop
-            df.loc[i,'pop_density']=pop_density
-            df.loc[i,'credits'] = df.loc[i,'credits'] + (si*di*(3**era))
+            df.loc[id,'iq']=iq  
+            df.loc[id,'population']=new_pop
+            df.loc[id,'pdensity']=pdensity
+            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*di*(3**era))
             await cont.send(("Turn "+turn[0]+' started!'))
-            crisis,death=crisis_for_era(i)
+            crisis,death=crisis_for_era(id)
             await stats(cont)
             if crisis!='none':
                 await cont.send('Your civilization is hit by '+crisis+'.\nYou lost '+str(death)+' people.')
-            df.to_csv('data.csv',index=False)
+            df.to_csv('data.csv')
 
 @client.command()
-async def buy(ctx, resource):
+async def buy(ctx,resource,quantity=1):
     team=ctx.channel.id
-    unlocked=buy_resource(team,resource)
+    unlocked=buy_resource(team,resource,quantity)
     if unlocked:
-        await ctx.send(res_aliases[resource] + " successfully bought! \nPlease check your stats.")
+        await ctx.send(str(quantity)+res_aliases[resource] + " successfully bought! \nPlease check your stats.")
     else:
         await ctx.send("Resource not available.")
 
@@ -307,9 +334,8 @@ async def start(ctx):
         await ctx.send(embed=embed)
 
         initialise()
-
         for i in range(teams):
-            id = df.loc[i,'id']
+            id = [int(x) for x in df.index][i]
             chan=client.get_channel(int(id))
             mess=await chan.get_partial_message(chan.last_message_id).fetch()
             cont=await client.get_context(mess)
@@ -318,17 +344,17 @@ async def start(ctx):
 @client.command()
 async def stats(ctx):
     id=ctx.channel.id
-    era=int(df.loc[df['id']==id,'era'])
+    era=int(df.loc[id,'era'])
     embed=discord.Embed(title='Stats',
-        description = f"Your planet : {str(df.loc[df['id']==id,'name']).split()[1]}\n Current Era : { d_era[int(df.loc[df['id']==id,'era'])]}\n Population : { float(df.loc[df['id']==id,'population'])} \n Average IQ : { float(df.loc[df['id']==id,'iq'])}\n Credits : {float(df.loc[df['id']==id,'credits'])}\n"
+        description = f"Your planet : {str(df.loc[id,'name'])}\n Current Era : { d_era[int(df.loc[id,'era'])]}\n Population : { float(df.loc[id,'population'])} \n Average IQ : { float(df.loc[id,'iq'])}\n Credits : {float(df.loc[id,'credits'])}\n"
                       f"-----------------------------------------------\n"
                       f"Resources\n"
                       f"-----------------------------------------------\n"
         ,color=discord.Colour.blue()
     )
-    for i in list(df.loc[df['id']==id])[14:]:
-        if float(df.loc[df['id']==id,str(i)])>0:    
-            embed.add_field(name=res_aliases[str(i)], value=float(df.loc[df['id']==id,str(i)]), inline=True)
+    for i in list(df.loc[id].keys())[13:]:
+        if float(df.loc[id,i])>0:    
+            embed.add_field(name=res_aliases[i], value=float(df.loc[id,i]), inline=True)
     await ctx.send(embed=embed)
     await buy_list(ctx, era)
 
@@ -340,19 +366,6 @@ async def id(ctx):
 '''@client.event
 async def on_message(message):
     print(f'{message.author} sends',message.content)'''
-
-@client.event
-async def on_member_join(member):
-    print(f"{member} has joined the server.")
-
-@client.event
-async def on_member_remove(member):
-    print(f"{member} has left the server.")
-
-@client.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        await ctx.send("Command doesn't exist")
 
 @client.command()
 async def load(ctx, extension):
