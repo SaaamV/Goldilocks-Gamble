@@ -13,9 +13,9 @@ teams = len(df)
 asked = False
 #add aliases to commands
 #add poem and epilogue
-#add leaderboards
-#Flora cap 100
 #end conditions
+#update iq real time
+#sort leaderboard
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
@@ -76,6 +76,7 @@ initial_values={
     'si':0,
     'di':0,
     'credits':6000.0,
+    'credch':0,
     'population':1000,
     'change':0,
     'iq':5.0,
@@ -224,33 +225,30 @@ def buy_resource(id,resource,quantity):
     exhaust=0
     rf = pd.read_csv('mapping.csv')
     era=int(df.loc[id,'era'])
-    with open('resources.csv') as resource_file:
-        for row in resource_file:
-            if row.split(sep=',')[0].lower()==resource.lower():
-                cred=float(row.split(sep=',')[era])
-                di_val = float(row.split(sep=',')[6])
-                e_factor = float(row.split(sep=',')[7])
-    if cred==0:
-        return False,exhaust
-    else:
+    resf=pd.read_csv('resources.csv',index_col=0)
+    if resource in resf.index and resf.loc[resource,str(era)]>0:
+        cred=resf.loc[resource,'6']
         updated_creds=df.loc[id,'credits']-int(quantity)*cred*df.loc[id,'mult']
         if updated_creds<0:
             exhaust=1
         else:
+            df.loc[id,'credch']=int(df.loc[id,'credch']+updated_creds-df.loc[id,'credits'])
             df.loc[id,'credits']=updated_creds
             if resource.lower() == 'seeds':
-                seed = int(3*int(df.loc[id,'population'])/100 + float(df.loc[id,'si']))
+                seed = int(5*int(df.loc[id,'population'])/100 + float(df.loc[id,'si'])*5)
                 df.loc[id,'population']=int(df.loc[id,'population']+int(quantity)*seed)
-                df.loc[id,'change']=int(quantity)*seed
+                df.loc[id,'change']=df.loc[id,'change']+int(quantity)*seed
             else:
                 df.loc[id,str(resource)]=df.loc[id,str(resource)]+int(quantity)
-                di_i = int(quantity)*di_val/(era-e_factor)
+                di_i = int(quantity)*resf.loc[resource,str(era)]
                 df.loc[id,'di']=df.loc[id,'di']+round(di_i,2) 
             for index in rf.keys()[1:]:
                 df.loc[id,index]=df.loc[id,index]+int(quantity)*float(rf.loc[rf['f']==resource,index])
+    else:
+        return False,exhaust
         
-        df.to_csv('data.csv')
-        return True,exhaust
+    df.to_csv('data.csv')
+    return True,exhaust
 
 @client.command()
 async def turn(ctx):
@@ -302,7 +300,8 @@ async def turn(ctx):
             df.loc[id,'iq']=iq  
             df.loc[id,'population']=new_pop
             df.loc[id,'pdensity']=pdensity
-            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*(1+di)*(1.5**era)/10)
+            df.loc[id,'credch']=int(df.loc[id,'credch']+(si*(1+di)*(1.2**era)))
+            df.loc[id,'credits'] = int(df.loc[id,'credits'] + (si*(1+di)*(1.2**era)))
             await cont.send(("Turn "+turn[0]+' started!'))
             crisis,death=crisis_for_era(id)
             #print(crisis,death)
@@ -379,26 +378,26 @@ async def stats(ctx):
     id=ctx.channel.id
     era=int(df.loc[id,'era'])
     embed=discord.Embed(title='Stats',
-        description = f"Your planet : {str(df.loc[id,'name'])}\n Current Era : { d_era[int(df.loc[id,'era'])]}\n Population : { float(df.loc[id,'population'])} ({'{:+}'.format(df.loc[id,'change'])}) \n Average IQ : { round(df.loc[id,'iq'],2)}\n Credits : {round(float(df.loc[id,'credits']),2)}\n"
+        description = f"Your planet : {str(df.loc[id,'name'])}\n Current Era : { d_era[int(df.loc[id,'era'])]}\n Population : { float(df.loc[id,'population'])} ({'{:+}'.format(df.loc[id,'change'])}) \n Average IQ : { round(df.loc[id,'iq'],2)}\n Credits : {round(float(df.loc[id,'credits']),2)} ({'{:+}'.format(df.loc[id,'credch'])})\n"
                       f"-----------------------------------------------\n"
                       f"Resources\n"
                       f"-----------------------------------------------\n"
         ,color=discord.Colour.blue()
     )
     df.loc[id,'change']=0
-    for i in list(df.loc[id].keys())[14:]:
+    df.loc[id,'credch']=0
+    for i in list(df.loc[id].keys())[list(df.columns).index('oxygen'):]:
         if float(df.loc[id,i])>0:    
             embed.add_field(name=res_aliases[i], value=round(float(df.loc[id,i]),2), inline=True)
     await ctx.send(embed=embed)
     await buy_list(ctx, era)
 
 async def buy_list(ctx, era):
-    res_file=open('resources.csv','r')
+    res_file=pd.read_csv('resources.csv',index_col=0)
     embed = discord.Embed(title="Resource Buy List",color=discord.Colour.red(), description='Resources available')
-    for line in res_file:
-        lst=line.split(sep=',')
-        if int(lst[era]):
-            embed.add_field(name=str(lst[0])+' : '+str(float(lst[era])*float(df.loc[int(ctx.channel.id),'mult'])), value='Buy 1 '+res_aliases[lst[0]] ,inline=False)
+    for i in res_file.index:
+        if int(res_file.loc[i,str(era)]):
+            embed.add_field(name=i+' : '+str(float(res_file.loc[i,'6'])*float(df.loc[int(ctx.channel.id),'mult']))+" credits", value='Buy 1 '+res_aliases[i] ,inline=False)
     await ctx.send(embed=embed)
 
 @client.command()
@@ -410,7 +409,7 @@ async def leaderboard(ctx):
     for i in range(teams):
         name.append(df.iloc[i,0])
         era.append(d_era[df.iloc[i,1]])
-        score.append(round(df.iloc[i,10]*df.iloc[i,12],2))
+        score.append(round(df.iloc[i,list(df.columns).index('si')]*df.iloc[i,list(df.columns).index('di')],2))
 
     embed.add_field(name='Team', value="\n".join(name), inline=True)
     embed.add_field(name='Era', value="\n".join(era), inline=True)
