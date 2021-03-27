@@ -4,6 +4,7 @@ import os
 from discord.ext import commands
 import pandas as pd
 import math
+import time
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
@@ -12,7 +13,7 @@ teams = len(df)
 asked = False
 #add aliases to commands
 #add poem and epilogue
-#IQ equation too steep
+#add leaderboards
 #Flora cap 100
 #credits exhaust message, stop transactions
 #fix resource bought message
@@ -58,11 +59,16 @@ res_aliases={
     'temp':'Temperature',
     'population':'Population',
     'biomes':'Biomes',
+    'mine':'Mine(s)',
     'factory':'Factory(s)',
-    'farms':'Farm(s)'}
+    'farms':'Farm(s)',
+    'fuel':'Oil Well(s)',
+    'ai':'AI',
+    'satellite':'Shuttle Mines',
+    'dyson':"Dyson's Sphere"}
 
 initial_values={
-    'era':1,
+    'era':3,
     'story':0,
     'size':0,
     'distance':0,
@@ -145,24 +151,29 @@ async def new_era(ctx, era):
     
     if era <= 3:
         await ctx.send("You have uncovered a memory Cache.")
+        time.delay(2)
         message=""
         for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
             message = message + line
         await ctx.send(message)
+        time.delay(2)
         message=""
         for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
             message = message + line
         await ctx.send(message)
+        time.delay(2)
     elif era <= 5:
         await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
         asked = True
     else:
         asked = True
         if df.loc[id,'story'] == 2:
+            time.delay(2)
             message=""
             for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
                 message = message + line
                 await ctx.send(message)
+            time.delay(2)
             message=""
             for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
                 message = message + line
@@ -184,14 +195,17 @@ async def story(ctx, answer):
                 pass #add epilogue 2
         if answer == 'y':
             df.loc[id,'story'] = df.loc[id,'story'] + 1
+            time.delay(2)
             message=""
             for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
                 message = message + line
             await ctx.send(message)
             message=""
+            time.delay(2)
             for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
                 message = message + line
             await ctx.send(message)
+            time.delay(2)
 
 @client.command()
 async def buy(ctx,resource,quantity=1):
@@ -374,6 +388,7 @@ async def stats(ctx):
         if float(df.loc[id,i])>0:    
             embed.add_field(name=res_aliases[i], value=round(float(df.loc[id,i]),2), inline=True)
     await ctx.send(embed=embed)
+    print("Stated")
     await buy_list(ctx, era)
 
 async def buy_list(ctx, era):
@@ -411,5 +426,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.USN_immFcUs-Fk9L3TkeyTLbuX4'
+client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.9h2ena8zOXX_0tx4NH4dXss4D5U'
 client.run(client_id)
