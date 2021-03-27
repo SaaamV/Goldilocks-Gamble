@@ -443,5 +443,11 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
+'''@client.command()
+async def chlist(ctx):
+    for ch in ctx.channel.category.channels:
+        if ch!=ctx.channel:
+            print(ch.id,ch.name)'''
+
 client_id=''
 client.run(client_id)
