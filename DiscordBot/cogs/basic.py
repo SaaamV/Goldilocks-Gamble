@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-commands_dict={'help':'Show all available commands','stats':'Show your planet\'s stats','buy [resource name] [quantity]':'Buy [quantity] [resource(s)]','story [y/n]':'Agree/Disagree to follow side story'}
+commands_dict={'help':'Show all available commands','stats':'Show your planet\'s stats','buy [resource name] [quantity]':'Buy [quantity] [resource(s)]','story [y/n]':'Agree/Disagree to follow side story','leaderboard':'Show the current leaderboard'}
 class Basic(commands.Cog):
 
     def __init__(self, client):

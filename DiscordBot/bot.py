@@ -15,8 +15,7 @@ asked = False
 #add poem and epilogue
 #add leaderboards
 #Flora cap 100
-#credits exhaust message, stop transactions
-#fix resource bought message
+#end conditions
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
@@ -264,6 +263,8 @@ async def turn(ctx):
             para_file.write('turn,'+str(int(turn[0])+1))
             para_file.close()
 
+        if int(turn[0])%5==0:
+            await leaderboard(await client.get_context(await client.get_channel(824221175995432961).get_partial_message(client.get_channel(824221175995432961).last_message_id).fetch()))
         for i in range(teams):
             id = [int(x) for x in df.index][i]
             chan=client.get_channel(int(id))
@@ -401,6 +402,23 @@ async def buy_list(ctx, era):
     await ctx.send(embed=embed)
 
 @client.command()
+async def leaderboard(ctx):
+    embed=discord.Embed(title='Leaderboard',description='------------------------------------------------------',color=discord.Color.gold())
+    name=[]
+    era=[]
+    score=[]
+    for i in range(teams):
+        name.append(df.iloc[i,0])
+        era.append(d_era[df.iloc[i,1]])
+        score.append(round(df.iloc[i,10]*df.iloc[i,12],2))
+
+    embed.add_field(name='Team', value="\n".join(name), inline=True)
+    embed.add_field(name='Era', value="\n".join(era), inline=True)
+    embed.add_field(name='Score', value="\n".join(str(sc) for sc in score), inline=True)
+    await ctx.send(embed=embed)
+
+
+@client.command()
 async def id(ctx):
     print("ID requested:", ctx.channel.id)
     print("Channel: ", ctx.channel.name)
@@ -426,5 +444,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.96OrAy_A-wwOm9zb2Pa_5ICRVIM'
+client_id=''
 client.run(client_id)
