@@ -15,8 +15,6 @@ asked = False
 #add poem and epilogue
 #add leaderboards
 #Flora cap 100
-#credits exhaust message, stop transactions
-#fix resource bought message
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
@@ -295,13 +293,13 @@ async def turn(ctx):
             population=df.loc[id,'population']
             pdensity=int(iq/10+1)
             si= 0.00004*water*land*(1-pollute/100)*oxygen*(60-oxygen)
-            pop_capacity=(pdensity-biomes/100)*land*int(size_p)*1000
+            pop_capacity=pdensity*land*int(size_p)*1000
             new_pop=int(population*si*0.03*(1-population/pop_capacity))
             df.loc[id,'change']=new_pop-population
             df.loc[id,'iq']=iq  
             df.loc[id,'population']=new_pop
             df.loc[id,'pdensity']=pdensity
-            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*(1+di)*(3**era)/10)
+            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*(1+di)*(1.5**era)/10)
             await cont.send(("Turn "+turn[0]+' started!'))
             crisis,death=crisis_for_era(id)
             #print(crisis,death)
@@ -426,5 +424,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.96OrAy_A-wwOm9zb2Pa_5ICRVIM'
+client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.kf-Q2O4lTIE-M6LBmSQtoNR9RGI'
 client.run(client_id)
