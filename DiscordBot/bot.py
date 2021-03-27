@@ -73,6 +73,7 @@ initial_values={
     'di':0,
     'credits':10000.0,
     'population':1000,
+    'change':0,
     'iq':10.0,
     'pdensity':2,
     'oxygen':25.0,
@@ -137,10 +138,10 @@ def crisis_for_era(i):
     pollute=df.loc[i,'pollute']
     crisis='none'
     cf=pd.read_csv('crisis.csv')
-    era_df=cf.loc[cf['era']==era,'crisis']
+    era_df=cf.loc[cf['era']==era]
     print(era_df)
 
-    era_list=list(era_df)
+    era_list=list(era_df['crisis'])
     print(era_list)
     if 'floods' in era_list and water < 40:
         era_list.remove('floods')
@@ -160,16 +161,17 @@ def crisis_for_era(i):
         era_list.remove('famine')
     
     chance = random.random()
-    if chance < 0.3:
+    if chance < 1:
         crisis = random.choice(era_list)
-    print(cf.loc[cf.loc[cf['crisis']==crisis,'era']==era,'death'])
+    print(crisis)
     death=0
     if crisis!='none':
-        death = int(population*float(cf.loc[cf['crisis']==crisis,'death'])/100)
+        print(float(era_df.loc[era_df['crisis']==crisis,'death']))
+        death = int(int(population)*float(era_df.loc[era_df['crisis']==crisis,'death'])/100)
         population=int(population)-death
-        for index in cf.loc[cf['crisis']==crisis].keys()[3:]:
+        for index in era_df.loc[era_df['crisis']==crisis].keys()[3:]:
             print(index, end=' ')
-            df.loc[i,str(index)]=locals()[str(index)]*(1-float(cf.loc[cf['crisis']==crisis,index])/100)
+            df.loc[i,str(index)]=locals()[str(index)]*(1-float(era_df.loc[era_df['crisis']==crisis,index])/100)
     if crisis == 'flare':
         satellite = int(satellite*0.8)
     elif crisis == 'ai':
@@ -311,6 +313,7 @@ async def turn(ctx):
             si= 0.00004*water*land*(1-pollute/100)*oxygen*(60-oxygen)
             pop_capacity=(pdensity-biomes/100)*land*int(size_p)*1000
             new_pop=int(population*si*0.03*(1-population/pop_capacity))
+            df.loc[id,'change']=new_pop-population
             df.loc[id,'iq']=iq  
             df.loc[id,'population']=new_pop
             df.loc[id,'pdensity']=pdensity
@@ -318,9 +321,9 @@ async def turn(ctx):
             await cont.send(("Turn "+turn[0]+' started!'))
             crisis,death=crisis_for_era(id)
             #print(crisis,death)
-            await stats(cont)
             if crisis!='none':
                 await cont.send('Your civilization is hit by '+crisis_aliases[crisis]+'.\nYou lost '+str(death)+' people.')
+            await stats(cont)
             df.to_csv('data.csv')
 
 @client.command()
@@ -360,13 +363,13 @@ async def stats(ctx):
     id=ctx.channel.id
     era=int(df.loc[id,'era'])
     embed=discord.Embed(title='Stats',
-        description = f"Your planet : {str(df.loc[id,'name'])}\n Current Era : { d_era[int(df.loc[id,'era'])]}\n Population : { float(df.loc[id,'population'])} \n Average IQ : { round(df.loc[id,'iq'],3)}\n Credits : {float(df.loc[id,'credits'])}\n"
+        description = f"Your planet : {str(df.loc[id,'name'])}\n Current Era : { d_era[int(df.loc[id,'era'])]}\n Population : { float(df.loc[id,'population'])} ({'{:+}'.format(df.loc[id,'change'])}) \n Average IQ : { round(df.loc[id,'iq'],3)}\n Credits : {float(df.loc[id,'credits'])}\n"
                       f"-----------------------------------------------\n"
                       f"Resources\n"
                       f"-----------------------------------------------\n"
         ,color=discord.Colour.blue()
     )
-    for i in list(df.loc[id].keys())[13:]:
+    for i in list(df.loc[id].keys())[14:]:
         if float(df.loc[id,i])>0:    
             embed.add_field(name=res_aliases[i], value=float(df.loc[id,i]), inline=True)
     await ctx.send(embed=embed)
@@ -398,5 +401,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.fL2IlOL5SB-391G9BLmQvMUn4ds'
+client_id='NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.JkIlfym8HiumdtgEuDt-zf3VnW0'
 client.run(client_id)
