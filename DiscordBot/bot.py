@@ -11,12 +11,11 @@ df = pd.read_csv('data.csv',index_col=0)
 teams = len(df)
 asked = False
 #add aliases to commands
-#Too much initial credits
+#add poem and epilogue
 #IQ equation too steep
 #Flora cap 100
 #credits exhaust message, stop transactions
 #fix resource bought message
-#show population increase/decrease in embed
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
@@ -74,7 +73,7 @@ initial_values={
     'credits':10000.0,
     'population':1000,
     'change':0,
-    'iq':10.0,
+    'iq':5.0,
     'pdensity':2,
     'oxygen':25.0,
     'co2':0,
@@ -90,13 +89,33 @@ initial_values={
     'satellite':0,
     'dyson':0}
 
+@client.command()
+async def start(ctx):
+    if ctx.channel.id == 824221175995432961:
+        message=""
+        for line in open('./start_message.txt',encoding='utf8'):
+            message = message + line
+        embed=discord.Embed(title='Prologue', 
+            description = f'{message}',
+            color = discord.Colour.red())
+        await ctx.send(embed=embed)
+        print("initialise")
+        initialise()
+        print("iniitialised")
+        for i in range(teams):
+            id = [int(x) for x in df.index][i]
+            chan=client.get_channel(int(id))
+            mess=await chan.get_partial_message(chan.last_message_id).fetch()
+            cont=await client.get_context(mess)
+            await stats(cont)
+
 def initialise():
     #Active parameter chart
     water = {1:50, 2:60, 3:70}
     temp = {2:17 , 3:14 , 1:11}
     #Passive parameters
     with open('parameters.csv','w') as para_file:
-            para_file.write('turn,1')
+            para_file.write('turn,2')
             para_file.close()
 
     for i in range(len(df.index)):
@@ -111,7 +130,7 @@ def initialise():
         initial_values['land'] = 100 - initial_values['water']
         initial_values['temp'] = temp[initial_values['distance']]
 
-        si= round(0.000044*initial_values['water']*initial_values['land']*initial_values['oxygen']*(60-initial_values['oxygen']),2)
+        initial_values['si']= round(0.000044*initial_values['water']*initial_values['land']*initial_values['oxygen']*(60-initial_values['oxygen']),2)
         initial_values['mult']=round(initial_values['water']/(120-initial_values['water']),2)
         
         #Initial resources
@@ -121,6 +140,163 @@ def initialise():
         for res in range(1,len(df.keys())):
             df.iloc[i,res]=value_list[res-1]
     df.to_csv('data.csv')
+
+async def new_era(ctx, era):
+    await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
+    
+    if era <= 3:
+        await ctx.send("You have uncovered a memory Cache.")
+        message=""
+        for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
+            message = message + line
+        await ctx.send(message)
+        message=""
+        for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
+            message = message + line
+        await ctx.send(message)
+    elif era <= 5:
+        await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
+        asked = True
+    else:
+        asked = True
+        if df.loc[id,'story'] == 2:
+            message=""
+            for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
+                message = message + line
+                await ctx.send(message)
+            message=""
+            for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
+                message = message + line
+                await ctx.send(message)
+            #print poem
+            await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
+        else: #call story for epilogue 2
+            pass
+
+@client.command()
+async def story(ctx, answer):
+    if asked == True:
+        id = ctx.channel.id
+        era = df.loc[id,'era']
+        if era > 5 :
+            if answer == 'y' and df.loc[id,'story'] == 2:
+                pass #add epilogue 1
+            else:
+                pass #add epilogue 2
+        if answer == 'y':
+            df.loc[id,'story'] = df.loc[id,'story'] + 1
+            message=""
+            for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
+                message = message + line
+            await ctx.send(message)
+            message=""
+            for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
+                message = message + line
+            await ctx.send(message)
+
+@client.command()
+async def buy(ctx,resource,quantity=1):
+    team=ctx.channel.id
+    unlocked,exhaust=buy_resource(team,resource,quantity)
+    if unlocked:
+        if not exhaust:
+            await ctx.send(str(quantity)+' '+res_aliases[resource] + " successfully bought! \nPlease check your stats.")
+        else:
+            await ctx.send("You don\'t have the credits to perform this transaction. Kindly wait for the next turn.")
+    else:
+        await ctx.send("Resource not available.")
+
+def buy_resource(id,resource,quantity):
+    cred=0
+    amount=0
+    exhaust=0
+    rf = pd.read_csv('mapping.csv')
+    era=int(df.loc[id,'era'])
+    with open('resources.csv') as resource_file:
+        for row in resource_file:
+            if row.split(sep=',')[0].lower()==resource.lower():
+                cred=row.split(sep=',')[era+1]
+                amount=row.split(sep=',')[1]
+    if float(cred)==0:
+        return False,exhaust
+    else:
+        updated_creds=df.loc[id,'credits']-int(quantity)*float(cred)*df.loc[id,'mult']
+        if updated_creds<0:
+            exhaust=1
+        else:
+            df.loc[id,'credits']=updated_creds
+            if resource.lower() == 'seeds':
+                seed = int(3*int(df.loc[id,'population'])/100 + float(df.loc[id,'si']))
+                df.loc[id,'population']=int(df.loc[id,'population']+int(quantity)*seed)
+                df.loc[id,'change']=int(quantity)*seed
+            else:
+                df.loc[id,str(resource)]=df.loc[id,str(resource)]+int(quantity)*float(amount)
+                di_i = int(quantity)*float(amount)/df.loc[id,str(resource)]
+                df.loc[id,'di']=df.loc[id,'di']+round(di_i,2) 
+            for index in rf.keys()[1:]:
+                df.loc[id,index]=df.loc[id,index]+int(quantity)*float(rf.loc[rf['f']==resource,index])
+
+        df.to_csv('data.csv')
+
+        return True,exhaust
+
+@client.command()
+async def turn(ctx):
+    if ctx.channel.id == 824221175995432961:
+        asked = False
+        turn=0
+        with open('parameters.csv','r+') as para_file:
+            turn=[row.split(sep=',')[1] for row in para_file]
+            para_file.seek(0,os.SEEK_SET)
+            para_file.write('turn,'+str(int(turn[0])+1))
+            para_file.close()
+
+        for i in range(teams):
+            id = [int(x) for x in df.index][i]
+            chan=client.get_channel(int(id))
+            mess=await chan.get_partial_message(chan.last_message_id).fetch()
+            cont=await client.get_context(mess)
+
+            water=df.loc[id,'water']
+            land=df.loc[id,'land']
+            pollute=df.loc[id,'pollute']
+            di=df.loc[id,'di']
+            biomes=df.loc[id,'biomes']
+            size_p=df.loc[id,'size']
+            oxygen=df.loc[id,'oxygen']
+            era=df.loc[id,'era']
+            iq=initial_values['iq'] + 240*(1-math.exp(-di*era))
+            print(initial_values['iq'])
+
+            if iq>150:
+                era=5
+            elif iq>100:
+                era=4
+            elif iq>60:
+                era=3
+            elif iq>30:
+                era=2
+            #if df.loc[id,'era']!=era:
+                #await new_era(cont,era)
+
+            df.loc[id,'era']=era
+            population=df.loc[id,'population']
+            pdensity=int(iq/10+1)
+            si= 0.00004*water*land*(1-pollute/100)*oxygen*(60-oxygen)
+            pop_capacity=(pdensity-biomes/100)*land*int(size_p)*1000
+            new_pop=int(population*si*0.03*(1-population/pop_capacity))
+            df.loc[id,'change']=new_pop-population
+            df.loc[id,'iq']=iq  
+            df.loc[id,'population']=new_pop
+            df.loc[id,'pdensity']=pdensity
+            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*(1+di)*(1.5**era))
+            await cont.send(("Turn "+turn[0]+' started!'))
+            crisis,death=crisis_for_era(id)
+            #print(crisis,death)
+            if crisis!='none':
+                await cont.send('Your civilization is hit by '+crisis_aliases[crisis]+'.\nYou lost '+str(death)+' people.')
+            await stats(cont)
+            df.to_csv('data.csv')
 
 def crisis_for_era(i): 
     era=df.loc[i,'era']
@@ -190,174 +366,6 @@ def crisis_for_era(i):
     df.loc[i,'temp']=temp'''
     return crisis,death
 
-async def new_era(ctx, era):
-    await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
-    
-    if era < 3:
-        await ctx.send("You have uncovered a memory Cache.")
-        message=""
-        for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
-            message = message + line
-        await ctx.send(message)
-        message=""
-        for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
-            message = message + line
-        await ctx.send(message)
-    elif era < 5:
-        await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
-        asked = True
-    else:
-        if df.loc[id,'story'] == 2:
-            message=""
-            for line in open('./story'+era+'.txt',encoding='utf8'):
-                message = message + line
-                await ctx.send(message)
-            await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
-            asked = True
-
-@client.command()
-async def story(ctx, answer):
-    if asked == True:
-        id = ctx.channel.id
-        if df.loc[id,'era'] == 5 :
-            if answer == 'yes' and df.loc[id,'story'] == 2:
-                pass #add epilogue 1
-            else:
-                pass #add epilogue 2
-        if answer == 'yes':
-            df.loc[id,'story'] = df.loc[id,'story'] + 1
-
-async def buy_list(ctx, era):
-    res_file=open('resources.csv','r')
-    embed = discord.Embed(title="Resource Buy List",color=discord.Colour.red(), description='Resources available')
-    for line in res_file:
-        lst=line.split(sep=',')
-        if int(lst[era+1]):
-            embed.add_field(name=str(lst[0])+' : '+str(float(lst[era+1])*float(df.loc[int(ctx.channel.id),'mult'])), value='Buy '+lst[1]+' '+res_aliases[lst[0]] ,inline=False)
-    await ctx.send(embed=embed)
-
-def buy_resource(id,resource,quantity):
-    cred=0
-    amount=0
-    exhaust=0
-    rf = pd.read_csv('mapping.csv')
-    era=int(df.loc[id,'era'])
-    with open('resources.csv') as resource_file:
-        for row in resource_file:
-            if row.split(sep=',')[0].lower()==resource.lower():
-                cred=row.split(sep=',')[era+1]
-                amount=row.split(sep=',')[1]
-    if float(cred)==0:
-        return False,exhaust
-    else:
-        updated_creds=df.loc[id,'credits']-int(quantity)*float(cred)*df.loc[id,'mult']
-        if updated_creds<0:
-            exhaust=1
-        else:
-            df.loc[id,'credits']=updated_creds
-            if resource.lower() == 'seeds':
-                seed = int(3*int(df.loc[id,'population'])/100 + float(df.loc[id,'si'])*10)
-                df.loc[id,'population']=int(df.loc[id,'population']+int(quantity)*seed)
-            else:
-                df.loc[id,str(resource)]=df.loc[id,str(resource)]+int(quantity)*float(amount)
-                di_i = int(quantity)*float(amount)/df.loc[id,str(resource)]
-                df.loc[id,'di']=df.loc[id,'di']+round(di_i,2) 
-            for index in rf.keys()[1:]:
-                df.loc[id,index]=df.loc[id,index]+int(quantity)*float(rf.loc[rf['f']==resource,index])
-
-        df.to_csv('data.csv')
-
-        return True,exhaust
-
-@client.command()
-async def turn(ctx):
-    if ctx.channel.id == 824221175995432961:
-        asked = False
-        turn=0
-        with open('parameters.csv','r+') as para_file:
-            turn=[row.split(sep=',')[1] for row in para_file]
-            para_file.seek(0,os.SEEK_SET)
-            para_file.write('turn,'+str(int(turn[0])+1))
-            para_file.close()
-
-        for i in range(teams):
-            id = [int(x) for x in df.index][i]
-            chan=client.get_channel(int(id))
-            mess=await chan.get_partial_message(chan.last_message_id).fetch()
-            cont=await client.get_context(mess)
-
-            water=df.loc[id,'water']
-            land=df.loc[id,'land']
-            pollute=df.loc[id,'pollute']
-            di=df.loc[id,'di']
-            biomes=df.loc[id,'biomes']
-            size_p=df.loc[id,'size']
-            oxygen=df.loc[id,'oxygen']
-            era=df.loc[id,'era']
-            iq=10 + 240*(1-math.exp(-di*era))
-
-            if iq>150:
-                era=5
-            elif iq>100:
-                era=4
-            elif iq>60:
-                era=3
-            elif iq>30:
-                era=2
-            #if df.loc[id,'era']!=era:
-                #await new_era(cont,era)
-
-            df.loc[id,'era']=era
-            population=df.loc[id,'population']
-            pdensity=int(iq/10+1)
-            si= 0.00004*water*land*(1-pollute/100)*oxygen*(60-oxygen)
-            pop_capacity=(pdensity-biomes/100)*land*int(size_p)*1000
-            new_pop=int(population*si*0.03*(1-population/pop_capacity))
-            df.loc[id,'change']=new_pop-population
-            df.loc[id,'iq']=iq  
-            df.loc[id,'population']=new_pop
-            df.loc[id,'pdensity']=pdensity
-            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*di*(1.5**era))
-            await cont.send(("Turn "+turn[0]+' started!'))
-            crisis,death=crisis_for_era(id)
-            #print(crisis,death)
-            if crisis!='none':
-                await cont.send('Your civilization is hit by '+crisis_aliases[crisis]+'.\nYou lost '+str(death)+' people.')
-            await stats(cont)
-            df.to_csv('data.csv')
-
-@client.command()
-async def buy(ctx,resource,quantity=1):
-    team=ctx.channel.id
-    unlocked,exhaust=buy_resource(team,resource,quantity)
-    if unlocked:
-        if not exhaust:
-            await ctx.send(str(quantity)+' '+res_aliases[resource] + " successfully bought! \nPlease check your stats.")
-        else:
-            await ctx.send("You don\'t have the credits to perform this transaction. Kindly wait for the next turn.")
-    else:
-        await ctx.send("Resource not available.")
-        
-
-@client.command()
-async def start(ctx):
-    if ctx.channel.id == 824221175995432961:
-        message=""
-        for line in open('./start_message.txt',encoding='utf8'):
-            message = message + line
-        embed=discord.Embed(title='Prologue', 
-            description = f'{message}',
-            color = discord.Colour.red())
-        await ctx.send(embed=embed)
-
-        initialise()
-        for i in range(teams):
-            id = [int(x) for x in df.index][i]
-            chan=client.get_channel(int(id))
-            mess=await chan.get_partial_message(chan.last_message_id).fetch()
-            cont=await client.get_context(mess)
-            await stats(cont)
-
 @client.command()
 async def stats(ctx):
     id=ctx.channel.id
@@ -375,6 +383,15 @@ async def stats(ctx):
             embed.add_field(name=res_aliases[i], value=float(df.loc[id,i]), inline=True)
     await ctx.send(embed=embed)
     await buy_list(ctx, era)
+
+async def buy_list(ctx, era):
+    res_file=open('resources.csv','r')
+    embed = discord.Embed(title="Resource Buy List",color=discord.Colour.red(), description='Resources available')
+    for line in res_file:
+        lst=line.split(sep=',')
+        if int(lst[era+1]):
+            embed.add_field(name=str(lst[0])+' : '+str(float(lst[era+1])*float(df.loc[int(ctx.channel.id),'mult'])), value='Buy '+lst[1]+' '+res_aliases[lst[0]] ,inline=False)
+    await ctx.send(embed=embed)
 
 @client.command()
 async def id(ctx):
@@ -402,5 +419,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id=''
+client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.NwjVuunXh6QOzJU8M2WW1CN2NDI'
 client.run(client_id)

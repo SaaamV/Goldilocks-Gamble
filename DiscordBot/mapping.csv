@@ -1,6 +1,6 @@
 f,pollute,oxygen,co2,water,land,temp
 seeds,0,-0.5,0.25,-1,1,0
-biomes,0,1,-0.3,1,-1,-1.2
+biomes,0,1,-0.3,1,-1,-0.1
 farm,0,0,0,-2,2,-1
 mine,10,-0.5,0.3,-1.5,1.5,0
 factory,15,-1,0.7,-2,2,0.4
