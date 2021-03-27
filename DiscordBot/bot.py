@@ -369,6 +369,7 @@ async def stats(ctx):
                       f"-----------------------------------------------\n"
         ,color=discord.Colour.blue()
     )
+    df.loc[id,'change']=0
     for i in list(df.loc[id].keys())[14:]:
         if float(df.loc[id,i])>0:    
             embed.add_field(name=res_aliases[i], value=float(df.loc[id,i]), inline=True)
@@ -401,5 +402,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.JkIlfym8HiumdtgEuDt-zf3VnW0'
+client_id=''
 client.run(client_id)
