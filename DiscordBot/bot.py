@@ -15,7 +15,10 @@ asked = False
 #add poem and epilogue
 #add leaderboards
 #Flora cap 100
+<<<<<<< HEAD
 #end conditions
+=======
+>>>>>>> c463ebbf36f1e4c6e64a6865c27959bd85ad1ddc
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
@@ -296,13 +299,13 @@ async def turn(ctx):
             population=df.loc[id,'population']
             pdensity=int(iq/10+1)
             si= 0.00004*water*land*(1-pollute/100)*oxygen*(60-oxygen)
-            pop_capacity=(pdensity-biomes/100)*land*int(size_p)*1000
+            pop_capacity=pdensity*land*int(size_p)*1000
             new_pop=int(population*si*0.03*(1-population/pop_capacity))
             df.loc[id,'change']=new_pop-population
             df.loc[id,'iq']=iq  
             df.loc[id,'population']=new_pop
             df.loc[id,'pdensity']=pdensity
-            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*(1+di)*(3**era)/10)
+            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*(1+di)*(1.5**era)/10)
             await cont.send(("Turn "+turn[0]+' started!'))
             crisis,death=crisis_for_era(id)
             #print(crisis,death)
