@@ -15,10 +15,7 @@ asked = False
 #add poem and epilogue
 #add leaderboards
 #Flora cap 100
-<<<<<<< HEAD
 #end conditions
-=======
->>>>>>> c463ebbf36f1e4c6e64a6865c27959bd85ad1ddc
 
 size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
 distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
