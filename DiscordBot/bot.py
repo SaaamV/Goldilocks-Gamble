@@ -68,7 +68,7 @@ res_aliases={
     'dyson':"Dyson's Sphere"}
 
 initial_values={
-    'era':3,
+    'era':1,
     'story':0,
     'size':0,
     'distance':0,
@@ -76,7 +76,7 @@ initial_values={
     'mult':0,
     'si':0,
     'di':0,
-    'credits':5000.0,
+    'credits':6000.0,
     'population':1000,
     'change':0,
     'iq':5.0,
@@ -90,6 +90,7 @@ initial_values={
     'biomes':0,
     'farms':0,
     'factory':0,
+    'fuel':0,
     'mine':0,
     'ai':0,
     'satellite':0,
@@ -151,29 +152,29 @@ async def new_era(ctx, era):
     
     if era <= 3:
         await ctx.send("You have uncovered a memory Cache.")
-        time.delay(2)
+        #time.delay(2)
         message=""
         for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
             message = message + line
         await ctx.send(message)
-        time.delay(2)
+        #time.delay(2)
         message=""
         for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
             message = message + line
         await ctx.send(message)
-        time.delay(2)
+        #time.delay(2)
     elif era <= 5:
         await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
         asked = True
     else:
         asked = True
         if df.loc[id,'story'] == 2:
-            time.delay(2)
+            #time.delay(2)
             message=""
             for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
                 message = message + line
                 await ctx.send(message)
-            time.delay(2)
+            #time.delay(2)
             message=""
             for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
                 message = message + line
@@ -195,17 +196,17 @@ async def story(ctx, answer):
                 pass #add epilogue 2
         if answer == 'y':
             df.loc[id,'story'] = df.loc[id,'story'] + 1
-            time.delay(2)
+            #time.delay(2)
             message=""
             for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
                 message = message + line
             await ctx.send(message)
             message=""
-            time.delay(2)
+            #time.delay(2)
             for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
                 message = message + line
             await ctx.send(message)
-            time.delay(2)
+            #time.delay(2)
 
 @client.command()
 async def buy(ctx,resource,quantity=1):
@@ -300,7 +301,7 @@ async def turn(ctx):
             df.loc[id,'iq']=iq  
             df.loc[id,'population']=new_pop
             df.loc[id,'pdensity']=pdensity
-            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*(1+di)*(1.5**era)/10)
+            df.loc[id,'credits'] = df.loc[id,'credits'] + (si*(1+di)*(3**era)/10)
             await cont.send(("Turn "+turn[0]+' started!'))
             crisis,death=crisis_for_era(id)
             #print(crisis,death)
@@ -346,7 +347,7 @@ def crisis_for_era(i):
         era_list.remove('famine')
     
     chance = random.random()
-    if chance < 1:
+    if chance < .75:
         crisis = random.choice(era_list)
     death=0
     if crisis!='none':
@@ -388,7 +389,6 @@ async def stats(ctx):
         if float(df.loc[id,i])>0:    
             embed.add_field(name=res_aliases[i], value=round(float(df.loc[id,i]),2), inline=True)
     await ctx.send(embed=embed)
-    print("Stated")
     await buy_list(ctx, era)
 
 async def buy_list(ctx, era):
@@ -426,5 +426,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.9h2ena8zOXX_0tx4NH4dXss4D5U'
+client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.96OrAy_A-wwOm9zb2Pa_5ICRVIM'
 client.run(client_id)
