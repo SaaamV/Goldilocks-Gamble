@@ -12,7 +12,8 @@ asked = False
 #add aliases to commands
 #add poem and epilogue
 #end conditions
-
+dev_channel=824221175995432961
+announcement=824221175995432961
 size = {1:"Dwarf", 2:"Terrestial", 3:"Super-Earth"} #large is good
 distance = {2:"Cytherean", 3:"Gaian", 1:"Martian"} #ideal is good
 mass = {1:"Sub-Earth", 2:"Mid-Earth", 3:"Midplanet"} 
@@ -94,13 +95,16 @@ initial_values={
     'dyson':0}
 @client.command()
 async def start(ctx):
-    if ctx.channel.id == 824221175995432961:
+    if ctx.channel.id == dev_channel:
+        
+        a_cont=await client.get_context(await client.get_channel(announcement).get_partial_message(client.get_channel(announcement).last_message_id).fetch())
+
         if os.path.isfile('data.csv'):
             os.remove('data.csv')
         with open('data.csv','a') as data_file:
             data_file.write(',name,'+','.join(initial_values.keys()))
-            for ch in ctx.channel.category.text_channels:
-                if ch!=ctx.channel:
+            for ch in a_cont.channel.category.text_channels:
+                if ch!=a_cont.channel:
                     data_file.write('\n'+str(ch.id)+','+str(ch.name))
         df=pd.read_csv('data.csv',index_col=0).copy(deep=True)
         teams = len(df)
@@ -110,7 +114,7 @@ async def start(ctx):
         embed=discord.Embed(title='Prologue', 
             description = f'{message}',
             color = discord.Colour.red())
-        await ctx.send(embed=embed)
+        await a_cont.send(embed=embed)
         df=initialise(df)
         for i in range(teams):
             id = [int(x) for x in df.index][i]
@@ -234,6 +238,7 @@ def buy_resource(id,resource,quantity):
     cred=0
     exhaust=0
     rf = pd.read_csv('mapping.csv')
+    df=pd.read_csv('data.csv',index_col=0)
     era=int(df.loc[id,'era'])
     resf=pd.read_csv('resources.csv',index_col=0)
     if resource in resf.index and resf.loc[resource,str(era)]>0:
@@ -264,7 +269,7 @@ def buy_resource(id,resource,quantity):
 
 @client.command()
 async def turn(ctx):
-    if ctx.channel.id == 824221175995432961:
+    if ctx.channel.id == dev_channel:
         asked = False
         turn=0
         with open('parameters.csv','r+') as para_file:
@@ -274,7 +279,7 @@ async def turn(ctx):
             para_file.close()
 
         if int(turn[0])%5==0:
-            await leaderboard(await client.get_context(await client.get_channel(824221175995432961).get_partial_message(client.get_channel(824221175995432961).last_message_id).fetch()))
+            await leaderboard(await client.get_context(await client.get_channel(announcement).get_partial_message(client.get_channel(announcement).last_message_id).fetch()))
         for i in range(teams):
             id = [int(x) for x in df.index][i]
             chan=client.get_channel(int(id))
