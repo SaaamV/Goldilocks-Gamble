@@ -505,5 +505,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id=''
+client_id='NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.68IPgG2VJuaj5dxS-m3SmuHe1jc'
 client.run(client_id)
