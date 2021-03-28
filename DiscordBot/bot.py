@@ -65,7 +65,7 @@ res_aliases={
     'dyson':"Dyson's Sphere"}
 
 initial_values={
-    'era':3,
+    'era':1,
     'story':0,
     'asked':0,
     'size':0,
@@ -73,14 +73,14 @@ initial_values={
     'mass':0,
     'mult':0,
     'si':0,
-    'di':149,
+    'di':0,
     'credits':5000.0,
     'credch':0,
     'population':1000,
     'change':0,
-    'iq':1,
+    'iq':10,
     'iqch':0,
-    'pdensity':2,
+    'pdensity':1,
     'oxygen':25.0,
     'co2':0,
     'pollute':0,
@@ -300,7 +300,6 @@ async def turn(ctx):
         df=pd.read_csv('data.csv',index_col=0)
         teams = len(df)
         asked = 0
-        print("asked false")
         turn=0
         with open('parameters.csv','r+') as para_file:
             turn=[row.split(sep=',')[1] for row in para_file]
@@ -323,7 +322,6 @@ async def turn(ctx):
             oxygen=df.loc[id,'oxygen']
             era=df.loc[id,'era']
             iq=initial_values['iq'] + 241/(1+math.exp(-0.02*(di-150)))
-            print(iq)
             if iq>=240:
                 era=6
             if iq>212:
@@ -337,6 +335,7 @@ async def turn(ctx):
             print(era)
             if df.loc[id,'era']!=era:
                 await new_era(cont,era)
+            
             df.loc[id,'era']=era
             population=df.loc[id,'population']
             pdensity=int(iq/10+1)
@@ -349,6 +348,7 @@ async def turn(ctx):
             df.loc[id,'pdensity']=pdensity
             df.loc[id,'credch']=int(df.loc[id,'credch']+(si*(1+di)*(1.2**era)))
             df.loc[id,'credits'] = int(df.loc[id,'credits'] + (si*(1+di)*(1.2**era)))
+            
             await cont.send(("Turn "+turn[0]+' started!'))
             crisis,death=crisis_for_era(id)
             df.loc[id,'change']=df.loc[id,'change']-death
@@ -357,7 +357,8 @@ async def turn(ctx):
             await stats(cont)
             df.to_csv('data.csv')
 
-def crisis_for_era(i): 
+def crisis_for_era(i):
+    df=pd.read_csv('data.csv',index_col=0)
     era=df.loc[i,'era']
     water=df.loc[i,'water']
     land=df.loc[i,'land']
@@ -509,5 +510,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.tA4bgc6o0-ExFk2mK6veKQVuGCk'
+client_id=''
 client.run(client_id)
