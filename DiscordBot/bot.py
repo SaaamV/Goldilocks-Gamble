@@ -200,6 +200,8 @@ async def new_era(ctx, era):
                 message = message + line
             await ctx.send(message)
             await ctx.send("Do you wish to go to earth or stay here and continue\n'.story y' for yes and '.story n' for no")
+        else:
+            await ctx.send("GAME OVER!!!\nPlease Type '.story y' to continue")
     df.loc[ctx.channel.id,'asked']=asked
     df.to_csv("data.csv")
 
