@@ -8,8 +8,6 @@ import time
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
-df = pd.read_csv('data.csv',index_col=0)
-teams = len(df)
 asked = False
 #add aliases to commands
 #add poem and epilogue
@@ -94,10 +92,16 @@ initial_values={
     'ai':0,
     'satellite':0,
     'dyson':0}
-
 @client.command()
 async def start(ctx):
     if ctx.channel.id == 824221175995432961:
+        with open('data.csv','a') as data_file:
+            data_file.write(',name,'+','.join(initial_values.keys()))
+            for ch in ctx.channel.category.text_channels:
+                if ch!=ctx.channel:
+                    data_file.write('\n'+str(ch.id)+','+str(ch.name))
+        df=pd.read_csv('data.csv',index_col=0).copy(deep=True)
+        teams = len(df)
         message=""
         for line in open('./start_message.txt',encoding='utf8'):
             message = message + line
@@ -105,7 +109,7 @@ async def start(ctx):
             description = f'{message}',
             color = discord.Colour.red())
         await ctx.send(embed=embed)
-        initialise()
+        df=initialise(df)
         for i in range(teams):
             id = [int(x) for x in df.index][i]
             chan=client.get_channel(int(id))
@@ -113,7 +117,7 @@ async def start(ctx):
             cont=await client.get_context(mess)
             await stats(cont)
 
-def initialise():
+def initialise(df):
     #Active parameter chart
     water = {1:50, 2:60, 3:70}
     temp = {2:17 , 3:14 , 1:11}
@@ -122,7 +126,6 @@ def initialise():
     with open('parameters.csv','w') as para_file:
             para_file.write('turn,2')
             para_file.close()
-
     for i in range(len(df.index)):
         for res in range(2,len(df.keys())):
             df.iloc[i,res]=0
@@ -145,6 +148,7 @@ def initialise():
         for res in range(1,len(df.keys())):
             df.iloc[i,res]=value_list[res-1]
     df.to_csv('data.csv')
+    return df
 
 async def the_end(ctx):
     await ctx.send('you won!')
@@ -384,6 +388,7 @@ def crisis_for_era(i):
 
 @client.command()
 async def stats(ctx):
+    df=pd.read_csv('data.csv',index_col=0)
     id=ctx.channel.id
     era=int(df.loc[id,'era'])
     turn=[row.split(sep=',')[1] for row in open('parameters.csv','r')][0]
@@ -402,9 +407,11 @@ async def stats(ctx):
             embed.add_field(name=res_aliases[i], value=round(float(df.loc[id,i]),2), inline=True)
     embed.set_footer(text=f"Type : {str(size[df.loc[id,'size']])}\t\t\t\t\t\tTurn : {str(int(turn)-1)}\nOrbit Size : {str(distance[df.loc[id,'distance']])}\nMass : {str(mass[df.loc[id,'mass']])}")
     await ctx.send(embed=embed)
+    df.to_csv('data.csv')
     await buy_list(ctx, era)
 
 async def buy_list(ctx, era):
+    df=pd.read_csv('data.csv',index_col=0)
     res_file=pd.read_csv('resources.csv',index_col=0)
     embed = discord.Embed(title="Resource Buy List",color=discord.Colour.red(), description='Resources available')
     for i in res_file.index:
@@ -414,6 +421,7 @@ async def buy_list(ctx, era):
 
 @client.command()
 async def leaderboard(ctx):
+    df=pd.read_csv('data.csv',index_col=0)
     embed=discord.Embed(title='Leaderboard',description='------------------------------------------------------',color=discord.Color.gold())
     name=[]
     era=[]
@@ -465,12 +473,6 @@ async def reload(ctx, extension):
 for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
-
-'''@client.command()
-async def chlist(ctx):
-    for ch in ctx.channel.category.channels:
-        if ch!=ctx.channel:
-            print(ch.id,ch.name)'''
 
 client_id=''
 client.run(client_id)
