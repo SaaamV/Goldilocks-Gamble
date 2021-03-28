@@ -8,12 +8,12 @@ import time
 
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
-asked = False
 #add aliases to commands
 #add poem and epilogue
 #end conditions
 dev_channel=824221175995432961
 announcement=824221175995432961
+waittime = 5
 size = {1:"Dwarf", 2:"Terrestial", 3:"Super-Earth"} #large is good
 distance = {2:"Cytherean", 3:"Gaian", 1:"Martian"} #ideal is good
 mass = {1:"Sub-Earth", 2:"Mid-Earth", 3:"Midplanet"} 
@@ -65,8 +65,9 @@ res_aliases={
     'dyson':"Dyson's Sphere"}
 
 initial_values={
-    'era':1,
+    'era':3,
     'story':0,
+    'asked':0,
     'size':0,
     'distance':0,
     'mass':0,
@@ -163,7 +164,8 @@ async def the_end(ctx):
 
 async def new_era(ctx, era):
     await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
-    
+    df=pd.read_csv('data.csv',index_col=0)
+    asked = df.loc[ctx.channel.id,'asked']
     if era <= 3:
         await ctx.send("You have uncovered a memory Cache.")
         time.sleep(waittime)
@@ -179,9 +181,9 @@ async def new_era(ctx, era):
         time.sleep(waittime)
     elif era <= 5:
         await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
-        asked = True
+        asked = 1
     else:
-        asked = True
+        asked = 1
         if df.loc[id,'story'] == 2:
             time.sleep(waittime)
             message=""
@@ -198,12 +200,16 @@ async def new_era(ctx, era):
                 message = message + line
             await ctx.send(message)
             await ctx.send("Do you wish to go to earth or stay here and continue\n'.story y' for yes and '.story n' for no")
+    df.loc[ctx.channel.id,'asked']=asked
+    df.to_csv("data.csv")
 
 @client.command()
 async def story(ctx, answer):
-    if asked == True:
+    df=pd.read_csv('data.csv',index_col=0)
+    asked = df.loc[ctx.channel.id,'asked']
+    if int(asked) == 1:
         id = ctx.channel.id
-        era = df.loc[id,'era']
+        era = int(df.loc[id,'era'])+1
         if era > 5 :
             if answer == 'y' and df.loc[id,'story'] == 2:
                 message=""
@@ -238,7 +244,8 @@ async def story(ctx, answer):
                 message = message + line
             await ctx.send(message)
             time.sleep(waittime)
-        asked=False
+        df.loc[ctx.channel.id,'asked']=0
+        df.to_csv("data.csv")
 
 @client.command()
 async def buy(ctx,resource,quantity=1):
@@ -275,12 +282,12 @@ def buy_resource(id,resource,quantity):
                 df.loc[id,str(resource)]=df.loc[id,str(resource)]+int(quantity)
                 di_i = int(quantity)*resf.loc[resource,str(era)]
                 df.loc[id,'di']=df.loc[id,'di']+round(di_i,2)
-                df.loc[id,'iqch']=round(df.loc[id,'iqch']+initial_values['iq'] + 240/(1+math.exp(-0.02*(df.loc[id,'di']-150)))-df.loc[id,'iq'],2)
-                df.loc[id,'iq']=round(initial_values['iq'] + 240/(1+math.exp(-0.02*(df.loc[id,'di']-150))),2)
+                df.loc[id,'iqch']=round(df.loc[id,'iqch']+initial_values['iq'] + 241/(1+math.exp(-0.02*(df.loc[id,'di']-150)))-df.loc[id,'iq'],2)
+                df.loc[id,'iq']=round(241/(1+math.exp(-0.02*(df.loc[id,'di']-150))),2)
             for index in rf.keys()[1:]:
                 df.loc[id,index]=df.loc[id,index]+int(quantity)*float(rf.loc[rf['f']==resource,index])
     else:
-        return False,exhaust
+        return False,exhausts
         
     df.to_csv('data.csv')
     return True,exhaust
@@ -288,14 +295,16 @@ def buy_resource(id,resource,quantity):
 @client.command()
 async def turn(ctx):
     if ctx.channel.id == dev_channel:
-        asked = False
+        df=pd.read_csv('data.csv',index_col=0)
+        teams = len(df)
+        asked = 0
+        print("asked false")
         turn=0
         with open('parameters.csv','r+') as para_file:
             turn=[row.split(sep=',')[1] for row in para_file]
             para_file.seek(0,os.SEEK_SET)
             para_file.write('turn,'+str(int(turn[0])+1))
             para_file.close()
-
         if int(turn[0])%5==0:
             await leaderboard(await client.get_context(await client.get_channel(announcement).get_partial_message(client.get_channel(announcement).last_message_id).fetch()))
         for i in range(teams):
@@ -303,7 +312,6 @@ async def turn(ctx):
             chan=client.get_channel(int(id))
             mess=await chan.get_partial_message(chan.last_message_id).fetch()
             cont=await client.get_context(mess)
-
             water=df.loc[id,'water']
             land=df.loc[id,'land']
             pollute=df.loc[id,'pollute']
@@ -312,21 +320,21 @@ async def turn(ctx):
             size_p=df.loc[id,'size']
             oxygen=df.loc[id,'oxygen']
             era=df.loc[id,'era']
-            iq=initial_values['iq'] + 240/(1+math.exp(-0.02*(di-150)))
-
-            if iq>240:
+            iq=initial_values['iq'] + 241/(1+math.exp(-0.02*(di-150)))
+            print(iq)
+            if iq>=240:
                 era=6
-            if iq>180:
+            if iq>212:
                 era=5
             elif iq>120:
                 era=4
-            elif iq>60:
+            elif iq>75:
                 era=3
-            elif iq>35:
+            elif iq>30:
                 era=2
+            print(era)
             if df.loc[id,'era']!=era:
                 await new_era(cont,era)
-
             df.loc[id,'era']=era
             population=df.loc[id,'population']
             pdensity=int(iq/10+1)
@@ -342,7 +350,6 @@ async def turn(ctx):
             await cont.send(("Turn "+turn[0]+' started!'))
             crisis,death=crisis_for_era(id)
             df.loc[id,'change']=df.loc[id,'change']-death
-            #print(crisis,death)
             if crisis!='none':
                 await cont.send('Your civilization is hit by '+crisis_aliases[crisis]+'.\nYou lost '+str(death)+' people.')
             await stats(cont)
@@ -447,6 +454,7 @@ async def buy_list(ctx, era):
 @client.command()
 async def leaderboard(ctx):
     df=pd.read_csv('data.csv',index_col=0)
+    teams = len(df)
     embed=discord.Embed(title='Leaderboard',description='------------------------------------------------------',color=discord.Color.gold())
     name=[]
     era=[]
@@ -499,5 +507,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.h5l9vPmFKUUnzsO6WTmHMddCVfo'
+client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.tA4bgc6o0-ExFk2mK6veKQVuGCk'
 client.run(client_id)
