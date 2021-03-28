@@ -95,6 +95,8 @@ initial_values={
 @client.command()
 async def start(ctx):
     if ctx.channel.id == 824221175995432961:
+        if os.path.isfile('data.csv'):
+            os.remove('data.csv')
         with open('data.csv','a') as data_file:
             data_file.write(',name,'+','.join(initial_values.keys()))
             for ch in ctx.channel.category.text_channels:
