@@ -200,6 +200,8 @@ async def new_era(ctx, era):
                 message = message + line
             await ctx.send(message)
             await ctx.send("Do you wish to go to earth or stay here and continue\n'.story y' for yes and '.story n' for no")
+        else:
+            await ctx.send("GAME OVER!!!\nPlease Type '.story y' to continue")
     df.loc[ctx.channel.id,'asked']=asked
     df.to_csv("data.csv")
 
@@ -412,6 +414,7 @@ def crisis_for_era(i):
     df.loc[i,'farms']=farm
     df.loc[i,'factory']=factory
     df.loc[i,'satellite']=satellite
+    df.to_csv("data.csv")
     '''df.loc[i,'water']=water
     df.loc[i,'land']=land
     df.loc[i,'di']=di
@@ -480,7 +483,6 @@ async def leaderboard(ctx):
     embed.add_field(name='Era', value="\n".join(era), inline=True)
     embed.add_field(name='Score', value="\n".join(str(sc) for sc in score), inline=True)
     await ctx.send(embed=embed)
-
 
 @client.command()
 async def id(ctx):
