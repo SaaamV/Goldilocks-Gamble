@@ -22,7 +22,8 @@ d_era = {
     2:"Medieval",
     3:"Industrial",
     4:"Information",
-    5:"Future"}
+    5:"Future",
+    6:"Future"}
 
 crisis_aliases={
     'floods':'Floods',
@@ -70,12 +71,12 @@ initial_values={
     'mass':0,
     'mult':0,
     'si':0,
-    'di':0,
-    'credits':6000.0,
+    'di':149,
+    'credits':5000.0,
     'credch':0,
     'population':1000,
     'change':0,
-    'iq':5.0,
+    'iq':1,
     'iqch':0,
     'pdensity':2,
     'oxygen':25.0,
@@ -161,37 +162,38 @@ async def new_era(ctx, era):
     
     if era <= 3:
         await ctx.send("You have uncovered a memory Cache.")
-        #time.delay(2)
+        time.sleep(waittime)
         message=""
         for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
             message = message + line
         await ctx.send(message)
-        #time.delay(2)
+        time.sleep(waittime)
         message=""
         for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
             message = message + line
         await ctx.send(message)
-        #time.delay(2)
+        time.sleep(waittime)
     elif era <= 5:
         await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
         asked = True
     else:
         asked = True
         if df.loc[id,'story'] == 2:
-            #time.delay(2)
+            time.sleep(waittime)
             message=""
             for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
                 message = message + line
             await ctx.send(message)
-            #time.delay(2)
+            time.sleep(waittime)
             message=""
             for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
                 message = message + line
             await ctx.send(message)
-            #print poem
-            await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
-        else: #call story for epilogue 2
-            pass
+            message=""
+            for line in open('./poem.txt',encoding='utf8'):
+                message = message + line
+            await ctx.send(message)
+            await ctx.send("Do you wish to go to earth or stay here and continue\n'.story y' for yes and '.story n' for no")
 
 @client.command()
 async def story(ctx, answer):
@@ -200,22 +202,38 @@ async def story(ctx, answer):
         era = df.loc[id,'era']
         if era > 5 :
             if answer == 'y' and df.loc[id,'story'] == 2:
-                await ctx.send('epilogue 1')
+                message=""
+                for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
+                    message = message + line
+                await ctx.send(message)
+                message=""
+                time.sleep(waittime)
+                for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
+                    message = message + line
+                await ctx.send(message)
             else:
-                await ctx.send('epilogue 2')
+                message=""
+                for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
+                    message = message + line
+                await ctx.send(message)
+                message=""
+                time.sleep(waittime)
+                for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
+                    message = message + line
+                await ctx.send(message)
         if answer == 'y':
             df.loc[id,'story'] = df.loc[id,'story'] + 1
-            #time.delay(2)
+            time.sleep(waittime)
             message=""
             for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
                 message = message + line
             await ctx.send(message)
             message=""
-            #time.delay(2)
+            time.sleep(waittime)
             for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
                 message = message + line
             await ctx.send(message)
-            #time.delay(2)
+            time.sleep(waittime)
         asked=False
 
 @client.command()
@@ -292,7 +310,7 @@ async def turn(ctx):
             iq=initial_values['iq'] + 240/(1+math.exp(-0.02*(di-150)))
 
             if iq>240:
-                await the_end(cont)
+                era=6
             if iq>180:
                 era=5
             elif iq>120:
@@ -476,5 +494,5 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id=''
+client_id='NjI0MjY2ODc0MzU5NjQ0MTgw.XYOf1Q.h5l9vPmFKUUnzsO6WTmHMddCVfo'
 client.run(client_id)
