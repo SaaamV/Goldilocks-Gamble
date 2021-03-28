@@ -353,7 +353,7 @@ async def turn(ctx):
             if crisis!='none':
                 await cont.send('Your civilization is hit by '+crisis_aliases[crisis]+'.\nYou lost '+str(death)+' people.')
             await stats(cont)
-            df.to_csv('data.csv')
+        df.to_csv('data.csv')
 
 def crisis_for_era(i):
     df=pd.read_csv('data.csv',index_col=0)
