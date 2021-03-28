@@ -14,12 +14,10 @@ asked = False
 #add aliases to commands
 #add poem and epilogue
 #end conditions
-#update iq real time
-#sort leaderboard
 
-size = {1:"Small", 2:"Medium", 3:"Large"} #large is good
-distance = {2:"Close", 3:"Ideal", 1:"Far"} #ideal is good
-mass = {1:"Light", 2:"Medium", 3:"Heavy"} 
+size = {1:"Dwarf", 2:"Terrestial", 3:"Super-Earth"} #large is good
+distance = {2:"Cytherean", 3:"Gaian", 1:"Martian"} #ideal is good
+mass = {1:"Sub-Earth", 2:"Mid-Earth", 3:"Midplanet"} 
 
 d_era = {
     1:"Ancient",
@@ -80,6 +78,7 @@ initial_values={
     'population':1000,
     'change':0,
     'iq':5.0,
+    'iqch':0,
     'pdensity':2,
     'oxygen':25.0,
     'co2':0,
@@ -241,7 +240,9 @@ def buy_resource(id,resource,quantity):
             else:
                 df.loc[id,str(resource)]=df.loc[id,str(resource)]+int(quantity)
                 di_i = int(quantity)*resf.loc[resource,str(era)]
-                df.loc[id,'di']=df.loc[id,'di']+round(di_i,2) 
+                df.loc[id,'di']=df.loc[id,'di']+round(di_i,2)
+                df.loc[id,'iqch']=round(df.loc[id,'iqch']+initial_values['iq'] + 240/(1+math.exp(-0.02*(df.loc[id,'di']-150)))-df.loc[id,'iq'],2)
+                df.loc[id,'iq']=round(initial_values['iq'] + 240/(1+math.exp(-0.02*(df.loc[id,'di']-150))),2)
             for index in rf.keys()[1:]:
                 df.loc[id,index]=df.loc[id,index]+int(quantity)*float(rf.loc[rf['f']==resource,index])
     else:
@@ -378,7 +379,7 @@ async def stats(ctx):
     id=ctx.channel.id
     era=int(df.loc[id,'era'])
     embed=discord.Embed(title='Stats',
-        description = f"Your planet : {str(df.loc[id,'name'])}\n Current Era : { d_era[int(df.loc[id,'era'])]}\n Population : { float(df.loc[id,'population'])} ({'{:+}'.format(df.loc[id,'change'])}) \n Average IQ : { round(df.loc[id,'iq'],2)}\n Credits : {round(float(df.loc[id,'credits']),2)} ({'{:+}'.format(df.loc[id,'credch'])})\n"
+        description = f"Your planet : {str(df.loc[id,'name'])}\n Current Era : { d_era[int(df.loc[id,'era'])]}\n Population : { float(df.loc[id,'population'])} ({'{:+}'.format(df.loc[id,'change'])}) \n Average IQ : { round(df.loc[id,'iq'],2)} ({'{:+}'.format(df.loc[id,'iqch'])})\n Credits : {round(float(df.loc[id,'credits']),2)} ({'{:+}'.format(df.loc[id,'credch'])})\n"
                       f"-----------------------------------------------\n"
                       f"Resources\n"
                       f"-----------------------------------------------\n"
@@ -386,9 +387,11 @@ async def stats(ctx):
     )
     df.loc[id,'change']=0
     df.loc[id,'credch']=0
+    df.loc[id,'iqch']=0
     for i in list(df.loc[id].keys())[list(df.columns).index('oxygen'):]:
         if float(df.loc[id,i])>0:    
             embed.add_field(name=res_aliases[i], value=round(float(df.loc[id,i]),2), inline=True)
+    embed.set_footer(text=f"Size : {str(size[df.loc[id,'size']])}\nOrbit Size : {str(distance[df.loc[id,'distance']])}\nMass : {str(mass[df.loc[id,'mass']])}")
     await ctx.send(embed=embed)
     await buy_list(ctx, era)
 
@@ -406,10 +409,20 @@ async def leaderboard(ctx):
     name=[]
     era=[]
     score=[]
+    sorted_df=pd.DataFrame(columns=['name','era','score'],index=range(teams))
     for i in range(teams):
-        name.append(df.iloc[i,0])
+        sorted_df.loc[i,'name']=df.iloc[i,list(df.columns).index('name')]
+        sorted_df.loc[i,'era']=d_era[df.iloc[i,list(df.columns).index('era')]]
+        sorted_df.loc[i,'score']=round(df.iloc[i,list(df.columns).index('si')]*df.iloc[i,list(df.columns).index('di')],2)
+        '''name.append(df.iloc[i,0])
         era.append(d_era[df.iloc[i,1]])
-        score.append(round(df.iloc[i,list(df.columns).index('si')]*df.iloc[i,list(df.columns).index('di')],2))
+        score.append()'''
+    
+    sorted_df.sort_values(by='score',ascending=False,inplace=True)
+    for i in range(teams):
+        name.append(sorted_df.iloc[i,0])
+        era.append(sorted_df.iloc[i,1])
+        score.append(sorted_df.iloc[i,2])
 
     embed.add_field(name='Team', value="\n".join(name), inline=True)
     embed.add_field(name='Era', value="\n".join(era), inline=True)
