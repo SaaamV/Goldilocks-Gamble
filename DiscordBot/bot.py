@@ -11,8 +11,8 @@ client = commands.Bot(command_prefix = '.', description="type .help for availabl
 #add aliases to commands
 #add poem and epilogue
 #end conditions
-dev_channel=824221175995432961
-announcement=824221175995432961
+dev_channel=825646165294579723
+announcement=825646023456063489
 waittime = 5
 size = {1:"Dwarf", 2:"Terrestial", 3:"Super-Earth"} #large is good
 distance = {2:"Cytherean", 3:"Gaian", 1:"Martian"} #ideal is good
@@ -159,31 +159,29 @@ def initialise(df):
     return df
 
 async def the_end(ctx):
-    await ctx.send('you won!')
-    await client.logout()
+    await ctx.send('**Game Over! Well played!**')
+    #await client.logout()
 
 async def new_era(ctx, era):
     await ctx.send("Congratulations! Your civilization has progressed to " + d_era[era] + " era.")
     df=pd.read_csv('data.csv',index_col=0)
     asked = df.loc[ctx.channel.id,'asked']
-    if era <= 3:
-        await ctx.send("You have uncovered a memory Cache.")
-        time.sleep(waittime)
-        message=""
-        for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
-            message = message + line
-        await ctx.send(message)
-        time.sleep(waittime)
-        message=""
-        for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
-            message = message + line
-        await ctx.send(message)
-        time.sleep(waittime)
-    elif era <= 5:
-        await ctx.send("Do you wish to dedicate some resources to excavate a possible artifact.\n'.story y' for yes and '.story n' for no")
-        asked = 1
-    else:
-        asked = 1
+
+    await ctx.send("You have uncovered a memory Cache.")
+    time.sleep(waittime)
+    message=""
+    for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
+        message = message + line
+    await ctx.send(message)
+    time.sleep(waittime)
+    message=""
+    for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
+        message = message + line
+    await ctx.send(message)
+    time.sleep(waittime)
+    #else:
+    if era==6:
+        '''asked = 1
         if df.loc[id,'story'] == 2:
             time.sleep(waittime)
             message=""
@@ -194,18 +192,16 @@ async def new_era(ctx, era):
             message=""
             for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
                 message = message + line
-            await ctx.send(message)
-            message=""
-            for line in open('./poem.txt',encoding='utf8'):
-                message = message + line
-            await ctx.send(message)
-            await ctx.send("Do you wish to go to earth or stay here and continue\n'.story y' for yes and '.story n' for no")
-        else:
-            await ctx.send("GAME OVER!!!\nPlease Type '.story y' to continue")
-    df.loc[ctx.channel.id,'asked']=asked
+            await ctx.send(message)'''
+        message=""
+        for line in open('./poem.txt',encoding='utf8'):
+            message = message + line
+        await ctx.send(message)
+        await the_end(ctx)
+    #df.loc[ctx.channel.id,'asked']=asked
     df.to_csv("data.csv")
 
-@client.command()
+'''@client.command()
 async def story(ctx, answer):
     df=pd.read_csv('data.csv',index_col=0)
     asked = df.loc[ctx.channel.id,'asked']
@@ -233,7 +229,7 @@ async def story(ctx, answer):
                 for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
                     message = message + line
                 await ctx.send(message)
-        if answer == 'y':
+        elif answer == 'y':
             df.loc[id,'story'] = df.loc[id,'story'] + 1
             time.sleep(waittime)
             message=""
@@ -247,7 +243,7 @@ async def story(ctx, answer):
             await ctx.send(message)
             time.sleep(waittime)
         df.loc[ctx.channel.id,'asked']=0
-        df.to_csv("data.csv")
+        df.to_csv("data.csv")'''
 
 @client.command()
 async def buy(ctx,resource,quantity=1):
@@ -332,7 +328,6 @@ async def turn(ctx):
                 era=3
             elif iq>30:
                 era=2
-            print(era)
             if df.loc[id,'era']!=era:
                 await new_era(cont,era)
             
