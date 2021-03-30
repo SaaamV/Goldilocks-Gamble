@@ -1,23 +1,27 @@
+#Demo Project
+#https://pypi.org/project/create-discord-bot/
+from discord.ext import commands
+#https://discordpy.readthedocs.io/en/latest/intents.html
+#import logging
+#https://discordpy.readthedocs.io/en/latest/logging.html
 import discord
 import random
 import os
-from discord.ext import commands
+from dotenv import load_dotenv
 import pandas as pd
 import math
 import time
 
+load_dotenv()
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
-#add aliases to commands
-#add poem and epilogue
-#end conditions
-dev_channel=825646165294579723
-announcement=825646023456063489
+
+dev_channel=624267694329298974
+announcement=624267694329298974
 waittime = 5
 size = {1:"Dwarf", 2:"Terrestial", 3:"Super-Earth"} #large is good
 distance = {2:"Cytherean", 3:"Gaian", 1:"Martian"} #ideal is good
 mass = {1:"Sub-Earth", 2:"Mid-Earth", 3:"Midplanet"} 
-
 d_era = {
     1:"Ancient",
     2:"Medieval",
@@ -25,7 +29,6 @@ d_era = {
     4:"Information",
     5:"Future",
     6:"Future"}
-
 crisis_aliases={
     'floods':'Floods',
     'drought':'Droughts',
@@ -45,7 +48,6 @@ crisis_aliases={
     'nuclear':'Nuclear Disaster',
     'ozone':'Ozone Depletion',
     'ai':'AI Coup'}
-
 res_aliases={
     'seeds':'Population Seed(s)',
     'oxygen':'Oxygen',
@@ -63,7 +65,6 @@ res_aliases={
     'ai':'AI',
     'satellite':'Shuttle Mines',
     'dyson':"Dyson's Sphere"}
-
 initial_values={
     'era':1,
     'story':0,
@@ -95,6 +96,7 @@ initial_values={
     'ai':0,
     'satellite':0,
     'dyson':0}
+
 @client.command()
 async def start(ctx):
     if ctx.channel.id == dev_channel:
@@ -505,5 +507,4 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.68IPgG2VJuaj5dxS-m3SmuHe1jc'
-client.run(client_id)
+client.run(os.getenv("client_token"))
