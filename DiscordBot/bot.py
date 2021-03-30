@@ -462,6 +462,7 @@ async def leaderboard(ctx):
     score=[]
     sorted_df=pd.DataFrame(columns=['name','era','score'],index=range(teams))
     sorted_df=sorted_df.head()
+    print(sorted_df)
     for i in range(teams):
         sorted_df.loc[i,'name']=df.iloc[i,list(df.columns).index('name')]
         sorted_df.loc[i,'era']=d_era[df.iloc[i,list(df.columns).index('era')]]
@@ -469,7 +470,7 @@ async def leaderboard(ctx):
         '''name.append(df.iloc[i,0])
         era.append(d_era[df.iloc[i,1]])
         score.append()'''
-    
+    print(sorted_df)
     sorted_df.sort_values(by='score',ascending=False,inplace=True)
     for i in range(teams):
         name.append(sorted_df.iloc[i,0])
