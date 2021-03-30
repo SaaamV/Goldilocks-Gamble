@@ -16,9 +16,9 @@ load_dotenv()
 intents = discord.Intents(messages = True, guilds = True, reactions = True, members = True, presences = True)
 client = commands.Bot(command_prefix = '.', description="type .help for available commands", intents = intents,help_command=None)
 
-dev_channel=624267694329298974
+dev_channel=716458723521986581
 announcement=624267694329298974
-waittime = 5
+#waittime = 5
 size = {1:"Dwarf", 2:"Terrestial", 3:"Super-Earth"} #large is good
 distance = {2:"Cytherean", 3:"Gaian", 1:"Martian"} #ideal is good
 mass = {1:"Sub-Earth", 2:"Mid-Earth", 3:"Midplanet"} 
@@ -118,6 +118,7 @@ async def start(ctx):
         embed=discord.Embed(title='Prologue', 
             description = f'{message}',
             color = discord.Colour.red())
+        await a_cont.send("Goldilocks' Gamble started. Use .help")
         await a_cont.send(embed=embed)
         df=initialise(df)
         for i in range(teams):
@@ -170,17 +171,17 @@ async def new_era(ctx, era):
     asked = df.loc[ctx.channel.id,'asked']
 
     await ctx.send("You have uncovered a memory Cache.")
-    time.sleep(waittime)
+    #time.sleep(waittime)
     message=""
     for line in open('./story'+str(era-1)+'1.txt',encoding='utf8'):
         message = message + line
     await ctx.send(message)
-    time.sleep(waittime)
+    #time.sleep(waittime)
     message=""
     for line in open('./story'+str(era-1)+'2.txt',encoding='utf8'):
         message = message + line
     await ctx.send(message)
-    time.sleep(waittime)
+    #time.sleep(waittime)
     #else:
     if era==6:
         '''asked = 1
@@ -336,7 +337,7 @@ async def turn(ctx):
             df.loc[id,'era']=era
             population=df.loc[id,'population']
             pdensity=int(iq/10+1)
-            si= 0.00004*water*(land**1.3)*(1-pollute/100)*oxygen*(60-oxygen)
+            si= 0.000044*water*(land)*(1-pollute/100)*oxygen*(60-oxygen)
             pop_capacity=pdensity*land*int(size_p)*1000
             new_pop=int(population*si*0.03*(1-population/pop_capacity))
             df.loc[id,'change']=df.loc[id,'change']+new_pop-population
@@ -344,15 +345,14 @@ async def turn(ctx):
             df.loc[id,'population']=new_pop
             df.loc[id,'pdensity']=pdensity
             df.loc[id,'credch']=int(df.loc[id,'credch']+(si*(1+di)*(1.2**era)))
-            df.loc[id,'credits'] = int(df.loc[id,'credits'] + (si*(1+di)*(1.2**era)))
-            
+            df.loc[id,'credits'] = int(df.loc[id,'credits'] + (si*(3+di)*(1.2**era)))
+            df.to_csv('data.csv')
             await cont.send(("Turn "+turn[0]+' started!'))
             crisis,death=crisis_for_era(id)
             df.loc[id,'change']=df.loc[id,'change']-death
             if crisis!='none':
                 await cont.send('Your civilization is hit by '+crisis_aliases[crisis]+'.\nYou lost '+str(death)+' people.')
             await stats(cont)
-        df.to_csv('data.csv')
 
 def crisis_for_era(i):
     df=pd.read_csv('data.csv',index_col=0)
