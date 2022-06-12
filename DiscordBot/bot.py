@@ -1,6 +1,7 @@
 import discord
 import random
 import os
+import json
 from discord.ext import commands
 import pandas as pd
 import math
@@ -439,5 +440,16 @@ for filename in os.listdir('./cogs'):
     if filename.endswith(".py"):
         client.load_extension(f"cogs.{filename[:-3]}")
 
-client_id='NzczNDUzMDE5MzY2NDI0NTg2.X6JcQQ.68IPgG2VJuaj5dxS-m3SmuHe1jc'
-client.run(client_id)
+
+#securing bot token
+if os.path.exists(os.getcwd()+"/config.json"):
+    with open("./config.json") as f:
+        configData=json.load(f) 
+else:
+    configTemplate={"Token" : "","Prefix":"."}
+    with open(os.getcwd()+"/config.json","w+") as f:
+        json.dump(configTemplate, f)
+
+token=configData["Token"]
+prefix=configData["Prefix"]
+client.run(token)
